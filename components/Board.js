@@ -1,72 +1,79 @@
 import React, { useState } from "react";
 import Square from "./Square";
-import Piece from "./Piece";
+import Rook from "./Rook";
+import Knight from "./Knight";
+import Bishop from "./Bishop";
+import Queen from "./Queen";
+import King from "./King";
+import Pawn from "./Pawn";
+import EmptySquare from "./EmptySquare";
+
 const Board = () => {
   const initialBoardState = [
-    "rook-black",
-    "knight-black",
-    "bishop-black",
-    "queen-black",
-    "king-black",
-    "bishop-black",
-    "knight-black",
-    "rook-black",
-    "pawn-black",
-    "pawn-black",
-    "pawn-black",
-    "pawn-black",
-    "pawn-black",
-    "pawn-black",
-    "pawn-black",
-    "pawn-black",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "pawn-white",
-    "pawn-white",
-    "pawn-white",
-    "pawn-white",
-    "pawn-white",
-    "pawn-white",
-    "pawn-white",
-    "pawn-white",
-    "rook-white",
-    "knight-white",
-    "bishop-white",
-    "queen-white",
-    "king-white",
-    "bishop-white",
-    "knight-white",
-    "rook-white",
+    <Rook color="black" />,
+    <Knight color="black" />,
+    <Bishop color="black" />,
+    <Queen color="black" />,
+    <King color="black" />,
+    <Bishop color="black" />,
+    <Knight color="black" />,
+    <Rook color="black" />,
+    <Pawn color="black" />,
+    <Pawn color="black" />,
+    <Pawn color="black" />,
+    <Pawn color="black" />,
+    <Pawn color="black" />,
+    <Pawn color="black" />,
+    <Pawn color="black" />,
+    <Pawn color="black" />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <EmptySquare />,
+    <Pawn color="white" />,
+    <Pawn color="white" />,
+    <Pawn color="white" />,
+    <Pawn color="white" />,
+    <Pawn color="white" />,
+    <Pawn color="white" />,
+    <Pawn color="white" />,
+    <Pawn color="white" />,
+    <Rook color="white" />,
+    <Knight color="white" />,
+    <Bishop color="white" />,
+    <Queen color="white" />,
+    <King color="white" />,
+    <Bishop color="white" />,
+    <Knight color="white" />,
+    <Rook color="white" />,
   ];
 
   const [boardState, setBoardState] = useState(initialBoardState);
@@ -81,7 +88,7 @@ const Board = () => {
 
     const newBoardState = [...boardState];
     newBoardState[toIndex] = newBoardState[selectedPieceIndex];
-    newBoardState[selectedPieceIndex] = "";
+    newBoardState[selectedPieceIndex] = <EmptySquare />;
     setBoardState(newBoardState);
     setSelectedPieceIndex(null);
   };
@@ -96,7 +103,7 @@ const Board = () => {
             selectedPieceIndex !== null ? movePiece(index) : selectPiece(index)
           }
         >
-          <Piece piece={piece} />
+          {piece}
         </Square>
       ))}
     </div>
