@@ -26,7 +26,7 @@ const createInitialBoard = () => {
 
   ranks.split("").forEach((rank) => {
     files.split("").forEach((file) => {
-      let pieceComponent = null;
+      let piece = null;
       const color = rank > "6" ? "black" : "white";
       const square = `${file}${rank}`;
 
@@ -41,21 +41,17 @@ const createInitialBoard = () => {
           "Knight",
           "Rook",
         ];
-        pieceComponent = React.createElement(
-          pieceComponents[order[files.indexOf(file)]],
-          { color }
-        );
+        piece = { type: order[files.indexOf(file)], color };
       } else if (rank === "7" || rank === "2") {
-        pieceComponent = <Pawn color={color} />;
+        piece = { type: "Pawn", color };
       }
 
-      board[square] = pieceComponent || <EmptySquare />;
+      board[square] = piece;
     });
   });
 
   return board;
 };
-
 const Board = () => {
   const [boardState, setBoardState] = useState(createInitialBoard());
   const [selectedSquare, setSelectedSquare] = useState(null);
@@ -66,7 +62,12 @@ const Board = () => {
   const [blackTime, setBlackTime] = useState(initialTime);
 
   const selectSquare = (square) => {
-    if (!gameStarted) setGameStarted(true);
+    if (!gameStarted) {
+      setGameStarted(true);
+      // Reset times only if the game is not started
+      setWhiteTime(initialTime);
+      setBlackTime(initialTime);
+    }
 
     const piece = boardState[square];
     if (selectedSquare && selectedSquare !== square) {
@@ -74,30 +75,33 @@ const Board = () => {
       return;
     }
 
-    if (piece && piece.props.color === turn) {
+    if (piece && piece.color === turn) {
       setSelectedSquare(square);
     }
   };
 
   const movePiece = (toSquare) => {
     if (selectedSquare && isMoveValid(boardState, selectedSquare, toSquare)) {
-      if (selectedSquare && selectedSquare !== toSquare) {
-        const newBoardState = { ...boardState };
-        newBoardState[toSquare] = newBoardState[selectedSquare];
-        newBoardState[selectedSquare] = <EmptySquare />;
-        setBoardState(newBoardState);
-        setSelectedSquare(null);
-        setTurn(turn === "white" ? "black" : "white");
-      }
+      const newBoardState = { ...boardState };
+      newBoardState[toSquare] = newBoardState[selectedSquare];
+      newBoardState[selectedSquare] = null;
+      setBoardState(newBoardState);
+      setSelectedSquare(null);
+      setTurn(turn === "white" ? "black" : "white");
     }
   };
 
-  useEffect(() => {
-    if (!gameStarted) {
-      setWhiteTime(initialTime);
-      setBlackTime(initialTime);
-    }
-  }, [gameStarted]);
+  const renderPiece = (piece, position) => {
+    if (!piece) return <EmptySquare />;
+    const PieceComponent = pieceComponents[piece.type];
+    return (
+      <PieceComponent
+        color={piece.color}
+        position={position}
+        onSelect={selectSquare}
+      />
+    );
+  };
 
   const renderBoard = () => {
     const ranks = "87654321";
@@ -107,14 +111,13 @@ const Board = () => {
     ranks.split("").forEach((rank) => {
       files.split("").forEach((file) => {
         const square = `${file}${rank}`;
-        console.log("Name of the Square : " + square);
         squares.push(
           <Square
             key={square}
             position={square}
             onClick={() => selectSquare(square)}
           >
-            {boardState[square]}
+            {renderPiece(boardState[square], square)}
           </Square>
         );
       });
@@ -126,7 +129,7 @@ const Board = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center justify-center space-y-4">
       <ChessClock
         isActive={turn === "black" && gameStarted}
         time={blackTime}

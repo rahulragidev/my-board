@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image"; // Make sure to import Image from next/image
 
-const King = ({ color }) => {
+const King = ({ color, square }) => {
   return (
     <div>
       <Image

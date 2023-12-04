@@ -1,7 +1,8 @@
 import React from "react";
 import Image from "next/image"; // Make sure to import Image from next/image
 
-const Pawn = ({ color }) => {
+const Pawn = ({ color, square }) => {
+  console.log("This is name of the square : " + square);
   return (
     <div>
       <Image

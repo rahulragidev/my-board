@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image"; // Make sure to import Image from next/image
 
-const Bishop = ({ color }) => {
+const Bishop = ({ color, square }) => {
   return (
     <div>
       <Image

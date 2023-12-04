@@ -23,8 +23,8 @@ const ChessClock = ({ isActive, time, setTime }) => {
 
   return (
     <div
-      className={`font-bold text-lg ${
-        isActive ? "text-orange-600" : "text-gray-800"
+      className={`rounded-lg p-2 font-bold text-lg ${
+        isActive ? "text-orange-600 bg-black" : "text-gray-100 bg-gray-500"
       }`}
     >
       {formatTime(time)}
