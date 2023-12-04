@@ -19,12 +19,12 @@ const pieceComponents = {
 };
 
 const createInitialBoard = () => {
-  const rows = "87654321";
-  const cols = "abcdefgh";
+  const ranks = "87654321";
+  const files = "abcdefgh";
   const board = {};
 
-  rows.split("").forEach((row) => {
-    cols.split("").forEach((col) => {
+  ranks.split("").forEach((row) => {
+    files.split("").forEach((col) => {
       let pieceComponent = null;
       const color = row > "6" ? "black" : "white";
       const square = `${col}${row}`;
@@ -41,7 +41,7 @@ const createInitialBoard = () => {
           "Rook",
         ];
         pieceComponent = React.createElement(
-          pieceComponents[order[cols.indexOf(col)]],
+          pieceComponents[order[files.indexOf(col)]],
           { color }
         );
       } else if (row === "7" || row === "2") {
@@ -97,13 +97,14 @@ const Board = () => {
   }, [gameStarted]);
 
   const renderBoard = () => {
-    const rows = "87654321";
-    const cols = "abcdefgh";
+    const ranks = "87654321";
+    const files = "abcdefgh";
     const squares = [];
 
-    rows.split("").forEach((row) => {
-      cols.split("").forEach((col) => {
+    ranks.split("").forEach((row) => {
+      files.split("").forEach((col) => {
         const square = `${col}${row}`;
+        console.log("Name of the Square : " + square);
         squares.push(
           <Square
             key={square}
