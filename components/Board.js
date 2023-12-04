@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import Square from "./Square";
 import Rook from "./Rook";
 import Knight from "./Knight";
@@ -9,112 +9,82 @@ import Pawn from "./Pawn";
 import EmptySquare from "./EmptySquare";
 import ChessClock from "./ChessClock";
 
-const Board = () => {
-  const initialBoardState = [
-    <Rook color="black" />,
-    <Knight color="black" />,
-    <Bishop color="black" />,
-    <Queen color="black" />,
-    <King color="black" />,
-    <Bishop color="black" />,
-    <Knight color="black" />,
-    <Rook color="black" />,
-    <Pawn color="black" />,
-    <Pawn color="black" />,
-    <Pawn color="black" />,
-    <Pawn color="black" />,
-    <Pawn color="black" />,
-    <Pawn color="black" />,
-    <Pawn color="black" />,
-    <Pawn color="black" />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <EmptySquare />,
-    <Pawn color="white" />,
-    <Pawn color="white" />,
-    <Pawn color="white" />,
-    <Pawn color="white" />,
-    <Pawn color="white" />,
-    <Pawn color="white" />,
-    <Pawn color="white" />,
-    <Pawn color="white" />,
-    <Rook color="white" />,
-    <Knight color="white" />,
-    <Bishop color="white" />,
-    <Queen color="white" />,
-    <King color="white" />,
-    <Bishop color="white" />,
-    <Knight color="white" />,
-    <Rook color="white" />,
-  ];
+const pieceComponents = {
+  Rook,
+  Knight,
+  Bishop,
+  Queen,
+  King,
+  Pawn,
+};
 
-  const initialTime = 900; // 15 minutes in seconds
+const createInitialBoard = () => {
+  const rows = "87654321";
+  const cols = "abcdefgh";
+  const board = {};
+
+  rows.split("").forEach((row) => {
+    cols.split("").forEach((col) => {
+      let pieceComponent = null;
+      const color = row > "6" ? "black" : "white";
+      const square = `${col}${row}`;
+
+      if (row === "8" || row === "1") {
+        const order = [
+          "Rook",
+          "Knight",
+          "Bishop",
+          "Queen",
+          "King",
+          "Bishop",
+          "Knight",
+          "Rook",
+        ];
+        pieceComponent = React.createElement(
+          pieceComponents[order[cols.indexOf(col)]],
+          { color }
+        );
+      } else if (row === "7" || row === "2") {
+        pieceComponent = <Pawn color={color} />;
+      }
+
+      board[square] = pieceComponent || <EmptySquare />;
+    });
+  });
+
+  return board;
+};
+
+const Board = () => {
+  const [boardState, setBoardState] = useState(createInitialBoard());
+  const [selectedSquare, setSelectedSquare] = useState(null);
+  const [turn, setTurn] = useState("white");
+  const [gameStarted, setGameStarted] = useState(false);
+  const initialTime = 900;
   const [whiteTime, setWhiteTime] = useState(initialTime);
   const [blackTime, setBlackTime] = useState(initialTime);
-  const [turn, setTurn] = useState("white"); // Start with white's turn
-  const [gameStarted, setGameStarted] = useState(false);
 
-  const [boardState, setBoardState] = useState(initialBoardState);
-  const [selectedPieceIndex, setSelectedPieceIndex] = useState(null);
+  const selectSquare = (square) => {
+    if (!gameStarted) setGameStarted(true);
 
-  const selectPiece = (index) => {
-    if (!gameStarted) {
-      setGameStarted(true);
-    }
-
-    const piece = boardState[index];
-    // If a piece is already selected and the clicked square is different, try to move
-    if (selectedPieceIndex !== null && selectedPieceIndex !== index) {
-      movePiece(index); // Attempt to move the selected piece
+    const piece = boardState[square];
+    if (selectedSquare && selectedSquare !== square) {
+      movePiece(square);
       return;
     }
 
-    // Check if the piece at the index belongs to the player whose turn it is
     if (piece && piece.props.color === turn) {
-      setSelectedPieceIndex(index);
+      setSelectedSquare(square);
     }
   };
 
-  const movePiece = (toIndex) => {
-    // Ensure that a piece is selected and it's a different square to move to
-    if (selectedPieceIndex !== null && selectedPieceIndex !== toIndex) {
-      // Perform the move
-      const newBoardState = [...boardState];
-      newBoardState[toIndex] = newBoardState[selectedPieceIndex];
-      newBoardState[selectedPieceIndex] = <EmptySquare />;
+  const movePiece = (toSquare) => {
+    if (selectedSquare && selectedSquare !== toSquare) {
+      const newBoardState = { ...boardState };
+      newBoardState[toSquare] = newBoardState[selectedSquare];
+      newBoardState[selectedSquare] = <EmptySquare />;
       setBoardState(newBoardState);
-
-      // Reset the selected piece and switch turns
-      setSelectedPieceIndex(null);
+      setSelectedSquare(null);
       setTurn(turn === "white" ? "black" : "white");
     }
   };
@@ -126,6 +96,31 @@ const Board = () => {
     }
   }, [gameStarted]);
 
+  const renderBoard = () => {
+    const rows = "87654321";
+    const cols = "abcdefgh";
+    const squares = [];
+
+    rows.split("").forEach((row) => {
+      cols.split("").forEach((col) => {
+        const square = `${col}${row}`;
+        squares.push(
+          <Square
+            key={square}
+            position={square}
+            onClick={() => selectSquare(square)}
+          >
+            {boardState[square]}
+          </Square>
+        );
+      });
+    });
+
+    return (
+      <div className="grid grid-cols-8 gap-0 w-full max-w-md">{squares}</div>
+    );
+  };
+
   return (
     <div className="flex flex-col items-center justify-center">
       <ChessClock
@@ -133,17 +128,7 @@ const Board = () => {
         time={blackTime}
         setTime={setBlackTime}
       />
-      <div className="grid grid-cols-8 gap-0 w-full max-w-md">
-        {boardState.map((piece, index) => (
-          <Square
-            key={index}
-            position={index}
-            onClick={() => selectPiece(index)}
-          >
-            {piece}
-          </Square>
-        ))}
-      </div>
+      {renderBoard()}
       <ChessClock
         isActive={turn === "white" && gameStarted}
         time={whiteTime}
