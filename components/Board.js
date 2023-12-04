@@ -8,6 +8,7 @@ import King from "./King";
 import Pawn from "./Pawn";
 import EmptySquare from "./EmptySquare";
 import ChessClock from "./ChessClock";
+import { isMoveValid } from "./ChessUtils";
 
 const pieceComponents = {
   Rook,
@@ -79,13 +80,15 @@ const Board = () => {
   };
 
   const movePiece = (toSquare) => {
-    if (selectedSquare && selectedSquare !== toSquare) {
-      const newBoardState = { ...boardState };
-      newBoardState[toSquare] = newBoardState[selectedSquare];
-      newBoardState[selectedSquare] = <EmptySquare />;
-      setBoardState(newBoardState);
-      setSelectedSquare(null);
-      setTurn(turn === "white" ? "black" : "white");
+    if (selectedSquare && isMoveValid(boardState, selectedSquare, toSquare)) {
+      if (selectedSquare && selectedSquare !== toSquare) {
+        const newBoardState = { ...boardState };
+        newBoardState[toSquare] = newBoardState[selectedSquare];
+        newBoardState[selectedSquare] = <EmptySquare />;
+        setBoardState(newBoardState);
+        setSelectedSquare(null);
+        setTurn(turn === "white" ? "black" : "white");
+      }
     }
   };
 
