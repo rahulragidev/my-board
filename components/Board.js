@@ -24,13 +24,13 @@ const createInitialBoard = () => {
   const files = "abcdefgh";
   const board = {};
 
-  ranks.split("").forEach((row) => {
-    files.split("").forEach((col) => {
+  ranks.split("").forEach((rank) => {
+    files.split("").forEach((file) => {
       let pieceComponent = null;
-      const color = row > "6" ? "black" : "white";
-      const square = `${col}${row}`;
+      const color = rank > "6" ? "black" : "white";
+      const square = `${file}${rank}`;
 
-      if (row === "8" || row === "1") {
+      if (rank === "8" || rank === "1") {
         const order = [
           "Rook",
           "Knight",
@@ -42,10 +42,10 @@ const createInitialBoard = () => {
           "Rook",
         ];
         pieceComponent = React.createElement(
-          pieceComponents[order[files.indexOf(col)]],
+          pieceComponents[order[files.indexOf(file)]],
           { color }
         );
-      } else if (row === "7" || row === "2") {
+      } else if (rank === "7" || rank === "2") {
         pieceComponent = <Pawn color={color} />;
       }
 
@@ -104,9 +104,9 @@ const Board = () => {
     const files = "abcdefgh";
     const squares = [];
 
-    ranks.split("").forEach((row) => {
-      files.split("").forEach((col) => {
-        const square = `${col}${row}`;
+    ranks.split("").forEach((rank) => {
+      files.split("").forEach((file) => {
+        const square = `${file}${rank}`;
         console.log("Name of the Square : " + square);
         squares.push(
           <Square
