@@ -64,7 +64,6 @@ const Board = () => {
   const selectSquare = (square) => {
     if (!gameStarted) {
       setGameStarted(true);
-      // Reset times only if the game is not started
       setWhiteTime(initialTime);
       setBlackTime(initialTime);
     }
