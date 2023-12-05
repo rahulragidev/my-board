@@ -90,23 +90,41 @@ const Board = () => {
     }
   };
 
+  const onDragStart = (position) => {
+    if (!gameStarted) {
+      setGameStarted(true);
+      setWhiteTime(initialTime);
+      setBlackTime(initialTime);
+    }
+
+    setSelectedSquare(position);
+  };
+
+  const onDrop = (toPosition) => {
+    if (
+      selectedSquare &&
+      selectedSquare !== toPosition &&
+      isMoveValid(boardState, selectedSquare, toPosition)
+    ) {
+      const movedPiece = boardState[selectedSquare];
+      const newBoardState = { ...boardState };
+      newBoardState[toPosition] = movedPiece;
+      newBoardState[selectedSquare] = null;
+      setBoardState(newBoardState);
+      setSelectedSquare(null);
+      setTurn(turn === "white" ? "black" : "white");
+    }
+  };
+
   const renderPiece = (piece, position) => {
-    if (!piece) return <EmptySquare />;
+    if (!piece) return null;
     const PieceComponent = pieceComponents[piece.type];
-    const isSelected = position === selectedSquare;
-
-    const wrapperClass = isSelected
-      ? "transform scale-105 shadow-inner animate-pulse transition-all duration-200"
-      : "transition-all duration-300";
-
     return (
-      <div className={wrapperClass}>
-        <PieceComponent
-          color={piece.color}
-          position={position}
-          onSelect={selectSquare}
-        />
-      </div>
+      <PieceComponent
+        color={piece.color}
+        onDragStart={() => onDragStart(position)}
+        onDragEnd={() => onDrop(position)}
+      />
     );
   };
 
@@ -123,6 +141,7 @@ const Board = () => {
             key={square}
             position={square}
             onClick={() => selectSquare(square)}
+            onDrop={onDrop}
           >
             {renderPiece(boardState[square], square)}
           </Square>
@@ -131,12 +150,14 @@ const Board = () => {
     });
 
     return (
-      <div className="grid grid-cols-8 gap-0 w-full max-w-md">{squares}</div>
+      <div className="grid grid-cols-8 w-80 h-80 sm:w-96 sm:h-96 md:w-[400px] md:h-[400px] lg:w-[600px] lg:h-[600px] mx-auto">
+        {squares}
+      </div>
     );
   };
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-4">
+    <div className="flex flex-col items-center justify-center p-4">
       <ChessClock
         isActive={turn === "black" && gameStarted}
         time={blackTime}
