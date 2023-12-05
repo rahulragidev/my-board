@@ -93,12 +93,20 @@ const Board = () => {
   const renderPiece = (piece, position) => {
     if (!piece) return <EmptySquare />;
     const PieceComponent = pieceComponents[piece.type];
+    const isSelected = position === selectedSquare;
+
+    const wrapperClass = isSelected
+      ? "transform scale-105 shadow-inner animate-pulse transition-all duration-200"
+      : "transition-all duration-300";
+
     return (
-      <PieceComponent
-        color={piece.color}
-        position={position}
-        onSelect={selectSquare}
-      />
+      <div className={wrapperClass}>
+        <PieceComponent
+          color={piece.color}
+          position={position}
+          onSelect={selectSquare}
+        />
+      </div>
     );
   };
 
