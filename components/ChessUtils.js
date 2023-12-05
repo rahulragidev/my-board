@@ -50,43 +50,135 @@ const isWithinBoardBounds = (square) => {
 };
 
 const isRookMoveValid = (boardState, fromSquare, toSquare) => {
-  // Rook moves in a straight line along a row or column
-  // Add logic to check if path is clear
-  // ...
+  const fromFile = fromSquare.charCodeAt(0);
+  const fromRank = parseInt(fromSquare[1], 10);
+  const toFile = toSquare.charCodeAt(0);
+  const toRank = parseInt(toSquare[1], 10);
 
-  return true; // Placeholder return
+  // Rook moves in a straight line along a row or column
+  if (fromFile !== toFile && fromRank !== toRank) {
+    return false; // Rook doesn't move diagonally
+  }
+
+  const fileStep = fromFile === toFile ? 0 : toFile > fromFile ? 1 : -1;
+  const rankStep = fromRank === toRank ? 0 : toRank > fromRank ? 1 : -1;
+
+  let currentFile = fromFile + fileStep;
+  let currentRank = fromRank + rankStep;
+
+  while (currentFile !== toFile || currentRank !== toRank) {
+    const currentSquare = String.fromCharCode(currentFile) + currentRank;
+    if (boardState[currentSquare]) {
+      return false; // Found a blocking piece
+    }
+    currentFile += fileStep;
+    currentRank += rankStep;
+  }
+
+  return true;
 };
 
 const isKnightMoveValid = (fromSquare, toSquare) => {
-  // Knight moves in an L-shape
-  // Add logic to check if the move is in L-shape
-  // ...
+  const fromFile = fromSquare.charCodeAt(0);
+  const fromRank = parseInt(fromSquare[1], 10);
+  const toFile = toSquare.charCodeAt(0);
+  const toRank = parseInt(toSquare[1], 10);
 
-  return true; // Placeholder return
+  const fileDiff = Math.abs(fromFile - toFile);
+  const rankDiff = Math.abs(fromRank - toRank);
+
+  // Knight moves in L-shape: 2 squares one way and 1 square the other way
+  return (
+    (fileDiff === 2 && rankDiff === 1) || (fileDiff === 1 && rankDiff === 2)
+  );
 };
 
 const isBishopMoveValid = (boardState, fromSquare, toSquare) => {
-  // Bishop moves diagonally
-  // Add logic to check if path is clear
-  // ...
+  const fromFile = fromSquare.charCodeAt(0);
+  const fromRank = parseInt(fromSquare[1], 10);
+  const toFile = toSquare.charCodeAt(0);
+  const toRank = parseInt(toSquare[1], 10);
 
-  return true; // Placeholder return
+  // Calculate file and rank differences
+  const fileDiff = Math.abs(fromFile - toFile);
+  const rankDiff = Math.abs(fromRank - toRank);
+
+  // Bishop moves diagonally, so file and rank differences must be equal
+  if (fileDiff !== rankDiff) {
+    return false; // Not a diagonal move
+  }
+
+  // Check for blocking pieces along the diagonal path
+  const fileStep = Math.sign(toFile - fromFile);
+  const rankStep = Math.sign(toRank - fromRank);
+  let currentFile = fromFile + fileStep;
+  let currentRank = fromRank + rankStep;
+
+  while (currentFile !== toFile || currentRank !== toRank) {
+    const currentSquare = String.fromCharCode(currentFile) + currentRank;
+    if (boardState[currentSquare]) {
+      return false; // Found a blocking piece
+    }
+    currentFile += fileStep;
+    currentRank += rankStep;
+  }
+
+  return true;
 };
 
 const isQueenMoveValid = (boardState, fromSquare, toSquare) => {
-  // Queen moves like both a Rook and a Bishop
-  // Add logic to check if path is clear
-  // ...
+  const fromFile = fromSquare.charCodeAt(0);
+  const fromRank = parseInt(fromSquare[1], 10);
+  const toFile = toSquare.charCodeAt(0);
+  const toRank = parseInt(toSquare[1], 10);
 
-  return true; // Placeholder return
+  // Calculate file and rank differences
+  const fileDiff = Math.abs(fromFile - toFile);
+  const rankDiff = Math.abs(fromRank - toRank);
+
+  // Check if the move is along a column, row, or diagonal
+  const isDiagonalMove = fileDiff === rankDiff;
+  const isStraightMove = fromFile === toFile || fromRank === toRank;
+
+  if (!isDiagonalMove && !isStraightMove) {
+    return false; // The queen doesn't move like this
+  }
+
+  // Check for any pieces in the path (straight or diagonal)
+  const fileStep = Math.sign(toFile - fromFile);
+  const rankStep = Math.sign(toRank - fromRank);
+  let currentFile = fromFile + fileStep;
+  let currentRank = fromRank + rankStep;
+
+  while (currentFile !== toFile || currentRank !== toRank) {
+    const currentSquare = String.fromCharCode(currentFile) + currentRank;
+    if (boardState[currentSquare]) {
+      return false; // Found a blocking piece
+    }
+    currentFile += fileStep;
+    currentRank += rankStep;
+  }
+
+  return true;
 };
 
 const isKingMoveValid = (fromSquare, toSquare) => {
-  // King moves one square in any direction
-  // Add logic to check if the move is only one square
-  // ...
+  const fromFile = fromSquare.charCodeAt(0);
+  const fromRank = parseInt(fromSquare[1], 10);
+  const toFile = toSquare.charCodeAt(0);
+  const toRank = parseInt(toSquare[1], 10);
 
-  return true; // Placeholder return
+  // Calculate file and rank differences
+  const fileDiff = Math.abs(fromFile - toFile);
+  const rankDiff = Math.abs(fromRank - toRank);
+
+  // King can move one square in any direction
+  // fileDiff and rankDiff should be 0 (no move), 1 (one square move), or both 1 (diagonal move)
+  return (
+    (fileDiff === 1 || fileDiff === 0) &&
+    (rankDiff === 1 || rankDiff === 0) &&
+    (fileDiff !== 0 || rankDiff !== 0)
+  );
 };
 
 const isPawnMoveValid = (boardState, fromSquare, toSquare, color) => {
@@ -95,35 +187,33 @@ const isPawnMoveValid = (boardState, fromSquare, toSquare, color) => {
   const toFile = toSquare.charCodeAt(0);
   const toRank = parseInt(toSquare[1], 10);
   const targetPiece = boardState[toSquare];
-
-  // Determine direction based on color
+  // pawn direction
   const direction = color === "white" ? 1 : -1;
 
-  // Pawn's starting rank (2 for white, 7 for black)
+  // starting pawn ranks
   const startRank = color === "white" ? 2 : 7;
 
-  // Forward move by one square
+  // Move forward
   if (fromFile === toFile && toRank === fromRank + direction) {
     return !targetPiece;
   }
 
-  // First move: forward by two squares
+  // First move, two squares forward
   if (
     fromFile === toFile &&
     fromRank === startRank &&
     toRank === fromRank + 2 * direction
   ) {
-    // Check if both squares in the path are unoccupied
+    // validation unoccupied squares
     const intermediateSquare =
       String.fromCharCode(fromFile) + (fromRank + direction);
     return !targetPiece && !boardState[intermediateSquare];
   }
 
-  // Diagonal capture
+  // capture diagonally
   if (Math.abs(fromFile - toFile) === 1 && toRank === fromRank + direction) {
     return targetPiece && targetPiece.color !== color;
   }
 
-  // If none of the above, the move is invalid
   return false;
 };
