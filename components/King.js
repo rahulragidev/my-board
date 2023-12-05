@@ -7,8 +7,8 @@ const King = ({ color, square }) => {
       <Image
         src={`/images/king-${color}.svg`}
         alt={`${color} king`}
-        width={80} // Set the width as needed
-        height={80} // Set the height as needed
+        width={50} // Set the width as needed
+        height={50} // Set the height as needed
         layout="fixed" // You can choose between 'fixed', 'fill', 'intrinsic', or 'responsive'
       />
     </div>

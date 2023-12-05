@@ -1,24 +1,17 @@
 import React from "react";
-import Image from "next/image";
-import { motion } from "framer-motion";
+import Image from "next/image"; // Make sure to import Image from next/image
 
-const Rook = ({ color, onDragStart, onDragEnd }) => {
+const Rook = ({ color }) => {
   return (
-    <motion.div
-      drag
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      whileDrag={{ scale: 1.1, zIndex: 50 }}
-      className="cursor-grab"
-    >
+    <div>
       <Image
         src={`/images/rook-${color}.svg`}
         alt={`${color} rook`}
-        width={80}
-        height={80}
-        layout="fixed"
+        width={50} // Set the width as needed
+        height={50} // Set the height as needed
+        layout="fixed" // You can choose between 'fixed', 'fill', 'intrinsic', or 'responsive'
       />
-    </motion.div>
+    </div>
   );
 };
 

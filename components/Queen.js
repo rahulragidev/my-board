@@ -7,8 +7,8 @@ const Queen = ({ color, square }) => {
       <Image
         src={`/images/queen-${color}.svg`}
         alt={`${color} queen`}
-        width={80} // Set the width as needed
-        height={80} // Set the height as needed
+        width={50} // Set the width as needed
+        height={50} // Set the height as needed
         layout="fixed" // You can choose between 'fixed', 'fill', 'intrinsic', or 'responsive'
       />
     </div>
