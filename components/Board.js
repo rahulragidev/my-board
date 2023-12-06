@@ -61,6 +61,20 @@ const Board = () => {
   const [whiteTime, setWhiteTime] = useState(initialTime);
   const [blackTime, setBlackTime] = useState(initialTime);
 
+  const [windowWidth, setWindowWidth] = useState(undefined);
+
+  useEffect(() => {
+    // Update the width when the component mounts
+    setWindowWidth(window.innerWidth);
+
+    // Add an event listener to update the width on resize
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+
+    // Clean up the event listener when the component unmounts
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const selectSquare = (square) => {
     if (!gameStarted) {
       setGameStarted(true);
@@ -130,8 +144,17 @@ const Board = () => {
       });
     });
 
+    const responsiveBoardSize = () => {
+      if (windowWidth < 600) return "max-w-lg"; // Mobile
+      if (windowWidth < 1024) return "max-w-xl"; // Tablet
+      if (windowWidth < 1440) return "max-w-2xl"; // Laptop
+      return "max-w-3xl"; // Large Screens
+    };
+
     return (
-      <div className="grid grid-cols-8 gap-0 w-full md:max-w-screen-md p-4">
+      <div
+        className={`grid grid-cols-8 gap-0 w-full max-w- ${responsiveBoardSize()} p-4`}
+      >
         {squares}
       </div>
     );
@@ -139,7 +162,7 @@ const Board = () => {
 
   return (
     <div className="flex flex-col md:flex-row justify-center items-center w-full h-full">
-      {/* Clock for Black Player */}
+      {/* Clock for Black Player 
       <div className="md:w-1/6 w-full px-4 py-2 md:py-0 md:px-2 md:order-1">
         <ChessClock
           isActive={turn === "black" && gameStarted}
@@ -147,13 +170,14 @@ const Board = () => {
           setTime={setBlackTime}
         />
       </div>
+      */}
 
       {/* Chessboard */}
       <div className="flex-grow flex justify-center items-center p-4 md:order-2">
         {renderBoard()}
       </div>
 
-      {/* Clock for White Player */}
+      {/* Clock for White Player 
       <div className="md:w-1/6 w-full px-4 py-2 md:py-0 md:px-2 md:order-3">
         <ChessClock
           isActive={turn === "white" && gameStarted}
@@ -161,6 +185,7 @@ const Board = () => {
           setTime={setWhiteTime}
         />
       </div>
+      */}
     </div>
   );
 };
