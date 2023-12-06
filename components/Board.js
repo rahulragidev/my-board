@@ -138,14 +138,23 @@ const Board = () => {
   };
 
   return (
-    <div className="flex items-center w-screen justify-center">
-      {renderBoard()}
-      <div className="space-y-5 mr-5">
+    <div className="flex flex-col md:flex-row justify-center items-center w-full h-full">
+      {/* Clock for Black Player */}
+      <div className="md:w-1/6 w-full px-4 py-2 md:py-0 md:px-2 md:order-1">
         <ChessClock
           isActive={turn === "black" && gameStarted}
           time={blackTime}
           setTime={setBlackTime}
         />
+      </div>
+
+      {/* Chessboard */}
+      <div className="flex-grow flex justify-center items-center p-4 md:order-2">
+        {renderBoard()}
+      </div>
+
+      {/* Clock for White Player */}
+      <div className="md:w-1/6 w-full px-4 py-2 md:py-0 md:px-2 md:order-3">
         <ChessClock
           isActive={turn === "white" && gameStarted}
           time={whiteTime}

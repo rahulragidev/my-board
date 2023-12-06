@@ -23,7 +23,7 @@ const ChessClock = ({ isActive, time, setTime }) => {
 
   return (
     <div
-      className={`rounded-lg p-4 shadow-md text-xl md:text-2xl lg:text-3xl font-bold ${
+      className={`rounded-lg p-2 md:p-4 shadow-md text-lg md:text-2xl lg:text-3xl font-bold ${
         isActive ? "text-orange-600 bg-black" : "text-gray-100 bg-gray-500"
       } transition-colors duration-300`}
     >
