@@ -9,6 +9,7 @@ import Pawn from "./Pawn";
 import EmptySquare from "./EmptySquare";
 import ChessClock from "./ChessClock";
 import { isMoveValid } from "./ChessUtils";
+import { motion } from "framer-motion";
 
 const pieceComponents = {
   Rook,
@@ -113,8 +114,9 @@ const Board = () => {
     const isSelected = position === selectedSquare;
 
     return (
-      <div
-        className={`transition-all duration-300 ease-in-out transform hover:scale-110 ${
+      <motion.div
+        whileHover={{ scale: 1.1 }}
+        className={`transition-all duration-300 ease-in-out ${
           isSelected ? "transform scale-105 shadow-inner animate-pulse" : ""
         }`}
       >
@@ -123,7 +125,7 @@ const Board = () => {
           position={position}
           onSelect={selectSquare}
         />
-      </div>
+      </motion.div>
     );
   };
 
@@ -169,17 +171,20 @@ const Board = () => {
     };
 
     return (
-      <div
+      <motion.div
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
         className={`grid grid-cols-8 gap-0 w-full max-w- ${responsiveBoardSize()} p-4`}
       >
         {squares}
-      </div>
+      </motion.div>
     );
   };
 
   return (
     <div className="flex flex-col md:flex-row justify-center items-center w-full h-full">
-      {/* Clock for Black Player 
+      {/* Clock for Black Player */}
       <div className="md:w-1/6 w-full px-4 py-2 md:py-0 md:px-2 md:order-1">
         <ChessClock
           isActive={turn === "black" && gameStarted}
@@ -187,14 +192,13 @@ const Board = () => {
           setTime={setBlackTime}
         />
       </div>
-      */}
 
       {/* Chessboard */}
       <div className="flex-grow flex justify-center items-center p-4 md:order-2">
         {renderBoard()}
       </div>
 
-      {/* Clock for White Player 
+      {/* Clock for White Player */}
       <div className="md:w-1/6 w-full px-4 py-2 md:py-0 md:px-2 md:order-3">
         <ChessClock
           isActive={turn === "white" && gameStarted}
@@ -202,7 +206,6 @@ const Board = () => {
           setTime={setWhiteTime}
         />
       </div>
-      */}
     </div>
   );
 };
