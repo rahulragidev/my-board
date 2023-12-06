@@ -62,18 +62,21 @@ const Board = () => {
   const [blackTime, setBlackTime] = useState(initialTime);
 
   const [windowWidth, setWindowWidth] = useState(undefined);
+  const [windowHeight, setWindowHeight] = useState(undefined);
 
   useEffect(() => {
-    // Update the width when the component mounts
     setWindowWidth(window.innerWidth);
+    setWindowHeight(window.innerHeight);
 
-    // Add an event listener to update the width on resize
-    const handleResize = () => setWindowWidth(window.innerWidth);
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      setWindowHeight(window.innerHeight);
+    };
+
     window.addEventListener("resize", handleResize);
 
-    // Clean up the event listener when the component unmounts
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [windowHeight]);
 
   const selectSquare = (square) => {
     if (!gameStarted) {
@@ -145,10 +148,24 @@ const Board = () => {
     });
 
     const responsiveBoardSize = () => {
-      if (windowWidth < 600) return "max-w-lg"; // Mobile
-      if (windowWidth < 1024) return "max-w-xl"; // Tablet
-      if (windowWidth < 1440) return "max-w-2xl"; // Laptop
-      return "max-w-3xl"; // Large Screens
+      const isLandscape = windowWidth > windowHeight;
+
+      // Mobile Devices
+      if (windowWidth < 600) {
+        return isLandscape ? "max-w-lg" : "max-w-md";
+      }
+
+      // Tablets
+      if (windowWidth < 1024) {
+        return isLandscape ? "max-w-lg" : "max-w-md";
+      }
+
+      // Laptops and Desktops
+      if (windowWidth < 1440) {
+        return "max-w-xl";
+      }
+
+      return "max-w-3xl";
     };
 
     return (
