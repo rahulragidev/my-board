@@ -7,8 +7,8 @@ const Knight = ({ color, square }) => {
       <Image
         src={`/images/knight-${color}.svg`}
         alt={`${color} knight`}
-        width={50} // Set the width as needed
-        height={50} // Set the height as needed
+        width={100} // Set the width as needed
+        height={100} // Set the height as needed
         layout="fixed" // You can choose between 'fixed', 'fill', 'intrinsic', or 'responsive'
       />
     </div>

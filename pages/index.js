@@ -1,12 +1,11 @@
 import Board from "@/components/Board";
-import React from "react";
 
 export default function Home() {
   return (
-    <div className="flex flex-col justify-center items-center h-screen bg-gray-300">
-      <h1 className="text-gray-600 text-3xl m-5"> BareBones Chess</h1>
+    <div className="flex flex-col items-center justify-center w-full h-full bg-gray-800 text-gray-200 space-y-4">
+      <h1 className="font-semibold text-4xl mt-5">Chess Board</h1>
       <Board />
-      <h1 className="text-gray-300 text-sm m-5">Made by Rahul Ragi</h1>
+      <p className="text-gray-600 text-lg md:text-xl">Created by Rahul Ragi</p>
     </div>
   );
 }

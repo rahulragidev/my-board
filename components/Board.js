@@ -95,12 +95,12 @@ const Board = () => {
     const PieceComponent = pieceComponents[piece.type];
     const isSelected = position === selectedSquare;
 
-    const wrapperClass = isSelected
-      ? "transform scale-105 shadow-inner animate-pulse transition-all duration-200"
-      : "transition-all duration-300";
-
     return (
-      <div className={wrapperClass}>
+      <div
+        className={`transition-all duration-300 ease-in-out transform hover:scale-110 ${
+          isSelected ? "transform scale-105 shadow-inner animate-pulse" : ""
+        }`}
+      >
         <PieceComponent
           color={piece.color}
           position={position}
@@ -131,25 +131,27 @@ const Board = () => {
     });
 
     return (
-      <div className="grid grid-cols-8 gap-0 w-full max-w-md">{squares}</div>
+      <div className="grid grid-cols-8 gap-0 w-full md:max-w-screen-md p-4">
+        {squares}
+      </div>
     );
   };
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-4">
-      <h1>Player 1</h1>
-      <ChessClock
-        isActive={turn === "black" && gameStarted}
-        time={blackTime}
-        setTime={setBlackTime}
-      />
+    <div className="flex items-center w-screen justify-center">
       {renderBoard()}
-      <ChessClock
-        isActive={turn === "white" && gameStarted}
-        time={whiteTime}
-        setTime={setWhiteTime}
-      />
-      <h1>Player 2</h1>
+      <div className="space-y-5 mr-5">
+        <ChessClock
+          isActive={turn === "black" && gameStarted}
+          time={blackTime}
+          setTime={setBlackTime}
+        />
+        <ChessClock
+          isActive={turn === "white" && gameStarted}
+          time={whiteTime}
+          setTime={setWhiteTime}
+        />
+      </div>
     </div>
   );
 };

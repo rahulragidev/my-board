@@ -7,8 +7,8 @@ const Pawn = ({ color, square }) => {
       <Image
         src={`/images/pawn-${color}.svg`}
         alt={`${color} pawn`}
-        width={50} // Set the width as needed
-        height={50} // Set the height as needed
+        width={100} // Set the width as needed
+        height={100} // Set the height as needed
         layout="fixed" // You can choose between 'fixed', 'fill', 'intrinsic', or 'responsive'
       />
     </div>

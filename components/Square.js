@@ -10,10 +10,11 @@ const Square = ({ children, position, onClick }) => {
   };
 
   const bgColor = isBlackSquare() ? "bg-green-800" : "bg-gray-200";
+  const hoverEffect = "hover:bg-opacity-75 transition duration-300";
 
   return (
     <div
-      className={`w-full aspect-square ${bgColor} flex justify-center items-center`}
+      className={`w-full aspect-square ${bgColor} ${hoverEffect} flex justify-center items-center`}
       onClick={onClick}
     >
       {children}
