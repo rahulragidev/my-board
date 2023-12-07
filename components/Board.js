@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Square from "./Square";
 import Rook from "./Rook";
 import Knight from "./Knight";
@@ -64,6 +64,7 @@ const Board = () => {
 
   const [windowWidth, setWindowWidth] = useState(undefined);
   const [windowHeight, setWindowHeight] = useState(undefined);
+  const squareRefs = useRef({});
 
   useEffect(() => {
     setWindowWidth(window.innerWidth);
@@ -97,11 +98,45 @@ const Board = () => {
     }
   };
 
-  const movePiece = (toSquare) => {
-    if (selectedSquare && isMoveValid(boardState, selectedSquare, toSquare)) {
+  const onDragEnd = (fromSquare, x, y) => {
+    const toSquare = Object.keys(squareRefs.current).find((square) => {
+      const rect = squareRefs.current[square].getBoundingClientRect();
+      return (
+        x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+      );
+    });
+
+    if (toSquare && isMoveValid(boardState, fromSquare, toSquare)) {
+      movePiece(fromSquare, toSquare);
+    }
+  };
+
+  const calculateTargetSquare = (x, y) => {
+    const boardTopLeftX = 100; // Replace with actual X position of board's top-left corner
+    const boardTopLeftY = 100; // Replace with actual Y position of board's top-left corner
+    const squareSize = 50; // Replace with actual size of a square in pixels
+
+    const fileIndex = Math.floor((x - boardTopLeftX) / squareSize);
+    const rankIndex = Math.floor((y - boardTopLeftY) / squareSize);
+
+    if (fileIndex < 0 || fileIndex > 7 || rankIndex < 0 || rankIndex > 7) {
+      return null; // Return null if the position is outside the board
+    }
+
+    const files = "abcdefgh";
+    const ranks = "87654321";
+
+    const file = files[fileIndex];
+    const rank = ranks[rankIndex];
+
+    return `${file}${rank}`;
+  };
+
+  const movePiece = (fromSquare, toSquare) => {
+    if (isMoveValid(boardState, fromSquare, toSquare)) {
       const newBoardState = { ...boardState };
-      newBoardState[toSquare] = newBoardState[selectedSquare];
-      newBoardState[selectedSquare] = null;
+      newBoardState[toSquare] = newBoardState[fromSquare];
+      newBoardState[fromSquare] = null;
       setBoardState(newBoardState);
       setSelectedSquare(null);
       setTurn(turn === "white" ? "black" : "white");
@@ -122,8 +157,8 @@ const Board = () => {
       >
         <PieceComponent
           color={piece.color}
-          position={position}
-          onSelect={selectSquare}
+          square={position}
+          onDragEnd={onDragEnd} // Make sure this is passed
         />
       </motion.div>
     );
@@ -141,6 +176,7 @@ const Board = () => {
           <Square
             key={square}
             position={square}
+            ref={(el) => (squareRefs.current[square] = el)}
             onClick={() => selectSquare(square)}
           >
             {renderPiece(boardState[square], square)}

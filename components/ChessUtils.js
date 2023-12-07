@@ -38,6 +38,10 @@ export const isMoveValid = (boardState, fromSquare, toSquare) => {
 };
 
 const isWithinBoardBounds = (square) => {
+  if (!square || square.length !== 2) {
+    return false;
+  }
+
   const file = square.charCodeAt(0);
   const rank = parseInt(square[1], 10);
 

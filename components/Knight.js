@@ -1,17 +1,23 @@
 import React from "react";
-import Image from "next/image"; // Make sure to import Image from next/image
+import Image from "next/image";
+import { motion } from "framer-motion";
 
-const Knight = ({ color, square }) => {
+const Knight = ({ color, square, onDragEnd }) => {
   return (
-    <div>
+    <motion.div
+      drag
+      whileDrag={{ scale: 1.2, zIndex: 100 }} // This will visually elevate the piece during dragging
+      onDragEnd={(event, info) => onDragEnd(square, info.point.x, info.point.y)} // Handle the drag end
+      className="flex justify-center items-center"
+    >
       <Image
         src={`/images/knight-${color}.svg`}
         alt={`${color} knight`}
-        width={100} // Set the width as needed
-        height={100} // Set the height as needed
-        layout="fixed" // You can choose between 'fixed', 'fill', 'intrinsic', or 'responsive'
+        width={100} // Width of the knight image
+        height={100} // Height of the knight image
+        layout="fixed" // Image layout
       />
-    </div>
+    </motion.div>
   );
 };
 
