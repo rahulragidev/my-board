@@ -10,7 +10,7 @@ const Knight = ({ color, square, onDragEnd }) => {
       onDragEnd={(event, info) =>
         onDragEnd(color, square, info.point.x, info.point.y)
       }
-      className="flex justify-center items-center relative"
+      className="flex justify-center items-center relative cursor-grab"
     >
       <Image
         src={`/images/knight-${color}.svg`}
