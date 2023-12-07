@@ -9,7 +9,7 @@ const Pawn = ({ color, square, onDragEnd }) => {
       drag
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
       onDragEnd={(event, info) => onDragEnd(square, info.point.x, info.point.y)}
-      className="flex justify-center items-center"
+      className="flex justify-center items-center relative"
     >
       <Image
         src={`/images/pawn-${color}.svg`}

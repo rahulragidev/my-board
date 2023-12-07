@@ -53,52 +53,34 @@ const createInitialBoard = () => {
 
   return board;
 };
+
 const Board = () => {
   const [boardState, setBoardState] = useState(createInitialBoard());
-  const [selectedSquare, setSelectedSquare] = useState(null);
   const [turn, setTurn] = useState("white");
   const [gameStarted, setGameStarted] = useState(false);
   const initialTime = 900;
   const [whiteTime, setWhiteTime] = useState(initialTime);
   const [blackTime, setBlackTime] = useState(initialTime);
 
-  const [windowWidth, setWindowWidth] = useState(undefined);
-  const [windowHeight, setWindowHeight] = useState(undefined);
   const squareRefs = useRef({});
 
-  useEffect(() => {
-    setWindowWidth(window.innerWidth);
-    setWindowHeight(window.innerHeight);
+  const movePiece = (fromSquare, toSquare) => {
+    if (isMoveValid(boardState, fromSquare, toSquare)) {
+      const newBoardState = { ...boardState };
+      newBoardState[toSquare] = newBoardState[fromSquare];
+      newBoardState[fromSquare] = null;
+      setBoardState(newBoardState);
+      setTurn(turn === "white" ? "black" : "white");
+    }
+  };
 
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-      setWindowHeight(window.innerHeight);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => window.removeEventListener("resize", handleResize);
-  }, [windowHeight]);
-
-  const selectSquare = (square) => {
+  const onDragEnd = (fromSquare, x, y) => {
     if (!gameStarted) {
       setGameStarted(true);
       setWhiteTime(initialTime);
       setBlackTime(initialTime);
     }
 
-    const piece = boardState[square];
-    if (selectedSquare && selectedSquare !== square) {
-      movePiece(square);
-      return;
-    }
-
-    if (piece && piece.color === turn) {
-      setSelectedSquare(square);
-    }
-  };
-
-  const onDragEnd = (fromSquare, x, y) => {
     const toSquare = Object.keys(squareRefs.current).find((square) => {
       const rect = squareRefs.current[square].getBoundingClientRect();
       return (
@@ -111,54 +93,19 @@ const Board = () => {
     }
   };
 
-  const calculateTargetSquare = (x, y) => {
-    const boardTopLeftX = 100; // Replace with actual X position of board's top-left corner
-    const boardTopLeftY = 100; // Replace with actual Y position of board's top-left corner
-    const squareSize = 50; // Replace with actual size of a square in pixels
-
-    const fileIndex = Math.floor((x - boardTopLeftX) / squareSize);
-    const rankIndex = Math.floor((y - boardTopLeftY) / squareSize);
-
-    if (fileIndex < 0 || fileIndex > 7 || rankIndex < 0 || rankIndex > 7) {
-      return null; // Return null if the position is outside the board
-    }
-
-    const files = "abcdefgh";
-    const ranks = "87654321";
-
-    const file = files[fileIndex];
-    const rank = ranks[rankIndex];
-
-    return `${file}${rank}`;
-  };
-
-  const movePiece = (fromSquare, toSquare) => {
-    if (isMoveValid(boardState, fromSquare, toSquare)) {
-      const newBoardState = { ...boardState };
-      newBoardState[toSquare] = newBoardState[fromSquare];
-      newBoardState[fromSquare] = null;
-      setBoardState(newBoardState);
-      setSelectedSquare(null);
-      setTurn(turn === "white" ? "black" : "white");
-    }
-  };
-
   const renderPiece = (piece, position) => {
     if (!piece) return <EmptySquare />;
     const PieceComponent = pieceComponents[piece.type];
-    const isSelected = position === selectedSquare;
 
     return (
       <motion.div
         whileHover={{ scale: 1.1 }}
-        className={`transition-all duration-300 ease-in-out ${
-          isSelected ? "transform scale-105 shadow-inner animate-pulse" : ""
-        }`}
+        className="transition-all duration-300 ease-in-out"
       >
         <PieceComponent
           color={piece.color}
           square={position}
-          onDragEnd={onDragEnd} // Make sure this is passed
+          onDragEnd={onDragEnd}
         />
       </motion.div>
     );
@@ -169,15 +116,16 @@ const Board = () => {
     const files = "abcdefgh";
     const squares = [];
 
-    ranks.split("").forEach((rank) => {
-      files.split("").forEach((file) => {
+    ranks.split("").forEach((rank, rankIndex) => {
+      files.split("").forEach((file, fileIndex) => {
+        const isDarkSquare = (rankIndex + fileIndex) % 2 === 1;
         const square = `${file}${rank}`;
         squares.push(
           <Square
             key={square}
             position={square}
+            isDarkSquare={isDarkSquare}
             ref={(el) => (squareRefs.current[square] = el)}
-            onClick={() => selectSquare(square)}
           >
             {renderPiece(boardState[square], square)}
           </Square>
@@ -185,42 +133,11 @@ const Board = () => {
       });
     });
 
-    const responsiveBoardSize = () => {
-      const isLandscape = windowWidth > windowHeight;
-
-      // Mobile Devices
-      if (windowWidth < 600) {
-        return isLandscape ? "max-w-lg" : "max-w-md";
-      }
-
-      // Tablets
-      if (windowWidth < 1024) {
-        return isLandscape ? "max-w-lg" : "max-w-md";
-      }
-
-      // Laptops and Desktops
-      if (windowWidth < 1440) {
-        return "max-w-xl";
-      }
-
-      return "max-w-3xl";
-    };
-
-    return (
-      <motion.div
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-        className={`grid grid-cols-8 gap-0 w-full max-w- ${responsiveBoardSize()} p-4`}
-      >
-        {squares}
-      </motion.div>
-    );
+    return <div className="grid grid-cols-8">{squares}</div>;
   };
 
   return (
     <div className="flex flex-col md:flex-row justify-center items-center w-full h-full">
-      {/* Clock for Black Player */}
       <div className="md:w-1/6 w-full px-4 py-2 md:py-0 md:px-2 md:order-1">
         <ChessClock
           isActive={turn === "black" && gameStarted}
@@ -229,12 +146,10 @@ const Board = () => {
         />
       </div>
 
-      {/* Chessboard */}
       <div className="flex-grow flex justify-center items-center p-4 md:order-2">
         {renderBoard()}
       </div>
 
-      {/* Clock for White Player */}
       <div className="md:w-1/6 w-full px-4 py-2 md:py-0 md:px-2 md:order-3">
         <ChessClock
           isActive={turn === "white" && gameStarted}

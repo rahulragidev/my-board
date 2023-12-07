@@ -6,16 +6,16 @@ const Queen = ({ color, square, onDragEnd }) => {
   return (
     <motion.div
       drag
-      whileDrag={{ scale: 1.2, zIndex: 100 }} // Scale up and increase z-index while dragging
-      onDragEnd={(event, info) => onDragEnd(square, info.point.x, info.point.y)} // Handle the drag end event
-      className="flex justify-center items-center"
+      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+      onDragEnd={(event, info) => onDragEnd(square, info.point.x, info.point.y)}
+      className="flex justify-center items-center relative"
     >
       <Image
         src={`/images/queen-${color}.svg`}
         alt={`${color} queen`}
-        width={100} // Width of the queen image
-        height={100} // Height of the queen image
-        layout="fixed" // Image layout
+        width={100}
+        height={100}
+        layout="fixed"
       />
     </motion.div>
   );
