@@ -74,7 +74,7 @@ const Board = () => {
     }
   };
 
-  const onDragEnd = (fromSquare, x, y) => {
+  const onDragEnd = (pieceColor, fromSquare, x, y) => {
     if (!gameStarted) {
       setGameStarted(true);
       setWhiteTime(initialTime);
@@ -87,9 +87,10 @@ const Board = () => {
         x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
       );
     });
-
-    if (toSquare && isMoveValid(boardState, fromSquare, toSquare)) {
-      movePiece(fromSquare, toSquare);
+    if (turn === pieceColor) {
+      if (toSquare && isMoveValid(boardState, fromSquare, toSquare)) {
+        movePiece(fromSquare, toSquare);
+      }
     }
   };
 

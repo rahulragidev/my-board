@@ -7,7 +7,9 @@ const Bishop = ({ color, square, onDragEnd }) => {
     <motion.div
       drag
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      onDragEnd={(event, info) => onDragEnd(square, info.point.x, info.point.y)}
+      onDragEnd={(event, info) =>
+        onDragEnd(color, square, info.point.x, info.point.y)
+      }
       className="flex justify-center items-center relative"
     >
       <Image
