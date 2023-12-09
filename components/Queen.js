@@ -11,7 +11,7 @@ const Queen = memo(({ color, square, onDragEnd }) => {
   return (
     <motion.div
       drag
-      dragElastic={0.5} // Adjust for a more natural drag feel
+      dragElastic={1.0} // Adjust for a more natural drag feel
       dragMomentum={true} // Consider turning this off if the drag feels too "floaty"
       onDragEnd={debouncedOnDragEnd}
       className="flex justify-center items-center relative cursor-grab"
