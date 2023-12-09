@@ -30,4 +30,5 @@ const Queen = memo(({ color, square, onDragEnd }) => {
   );
 });
 
+Queen.displayName = "Queen";
 export default Queen;

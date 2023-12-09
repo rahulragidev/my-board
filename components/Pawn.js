@@ -30,4 +30,6 @@ const Pawn = memo(({ color, square, onDragEnd }) => {
   );
 });
 
+Pawn.displayName = "Pawn";
+
 export default Pawn;

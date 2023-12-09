@@ -30,4 +30,5 @@ const Rook = memo(({ color, square, onDragEnd }) => {
   );
 });
 
+Rook.displayName = "Rook";
 export default Rook;

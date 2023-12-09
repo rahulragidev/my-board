@@ -30,4 +30,5 @@ const Bishop = memo(({ color, square, onDragEnd }) => {
   );
 });
 
+Bishop.displayName = "Bishop";
 export default Bishop;

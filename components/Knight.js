@@ -30,4 +30,5 @@ const Knight = memo(({ color, square, onDragEnd }) => {
   );
 });
 
+Knight.displayName = "Knight";
 export default Knight;

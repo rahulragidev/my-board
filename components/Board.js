@@ -30,6 +30,7 @@ const ChessPiece = memo(({ type, color, position, onDragEnd }) => {
     </motion.div>
   );
 });
+ChessPiece.displayName = "ChessPiece";
 
 const createInitialBoard = () => {
   const ranks = "87654321";
@@ -161,5 +162,5 @@ const Board = () => {
     </Suspense>
   );
 };
-
+Board.displayName = "Board";
 export default memo(Board);
