@@ -1,6 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useRef,
+  memo,
+  useCallback,
+  useMemo,
+  Suspense,
+} from "react";
 import Square from "./Square";
-import Rook from "./Rook";
+import Rook from "./Rook"; // Consider using lazy loading if these components are heavy
 import Knight from "./Knight";
 import Bishop from "./Bishop";
 import Queen from "./Queen";
@@ -11,14 +18,18 @@ import ChessClock from "./ChessClock";
 import { isMoveValid } from "./ChessUtils";
 import { motion } from "framer-motion";
 
-const pieceComponents = {
-  Rook,
-  Knight,
-  Bishop,
-  Queen,
-  King,
-  Pawn,
-};
+// Memoized component for chess pieces
+const ChessPiece = memo(({ type, color, position, onDragEnd }) => {
+  const PieceComponent = { Rook, Knight, Bishop, Queen, King, Pawn }[type];
+  return (
+    <motion.div
+      whileHover={{ scale: 1.1 }}
+      className="transition-all duration-300 ease-in-out"
+    >
+      <PieceComponent color={color} square={position} onDragEnd={onDragEnd} />
+    </motion.div>
+  );
+});
 
 const createInitialBoard = () => {
   const ranks = "87654321";
@@ -61,105 +72,94 @@ const Board = () => {
   const initialTime = 900;
   const [whiteTime, setWhiteTime] = useState(initialTime);
   const [blackTime, setBlackTime] = useState(initialTime);
-
   const squareRefs = useRef({});
 
-  const movePiece = (fromSquare, toSquare) => {
-    if (isMoveValid(boardState, fromSquare, toSquare)) {
-      const newBoardState = { ...boardState };
-      newBoardState[toSquare] = newBoardState[fromSquare];
-      newBoardState[fromSquare] = null;
-      setBoardState(newBoardState);
-      setTurn(turn === "white" ? "black" : "white");
-    }
-  };
+  const movePiece = useCallback(
+    (fromSquare, toSquare) => {
+      if (isMoveValid(boardState, fromSquare, toSquare)) {
+        const newBoardState = {
+          ...boardState,
+          [toSquare]: boardState[fromSquare],
+          [fromSquare]: null,
+        };
+        setBoardState(newBoardState);
+        setTurn(turn === "white" ? "black" : "white");
+      }
+    },
+    [boardState, turn]
+  );
 
-  const onDragEnd = (pieceColor, fromSquare, x, y) => {
-    if (!gameStarted) {
-      setGameStarted(true);
-      setWhiteTime(initialTime);
-      setBlackTime(initialTime);
-    }
+  const onDragEnd = useCallback(
+    (pieceColor, fromSquare, x, y) => {
+      if (turn !== pieceColor) return;
+      if (!gameStarted) {
+        setGameStarted(true);
+        setWhiteTime(initialTime);
+        setBlackTime(initialTime);
+      }
 
-    const toSquare = Object.keys(squareRefs.current).find((square) => {
-      const rect = squareRefs.current[square].getBoundingClientRect();
-      return (
-        x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
-      );
-    });
-    if (turn === pieceColor) {
-      if (toSquare && isMoveValid(boardState, fromSquare, toSquare)) {
+      const toSquare = Object.keys(squareRefs.current).find((square) => {
+        const rect = squareRefs.current[square].getBoundingClientRect();
+        return (
+          x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+        );
+      });
+
+      if (toSquare) {
         movePiece(fromSquare, toSquare);
       }
-    }
-  };
+    },
+    [turn, gameStarted, movePiece]
+  );
 
-  const renderPiece = (piece, position) => {
-    if (!piece) return <EmptySquare />;
-    const PieceComponent = pieceComponents[piece.type];
-
-    return (
-      <motion.div
-        whileHover={{ scale: 1.1 }}
-        className="transition-all duration-300 ease-in-out"
-      >
-        <PieceComponent
-          color={piece.color}
-          square={position}
-          onDragEnd={onDragEnd}
-        />
-      </motion.div>
-    );
-  };
-
-  const renderBoard = () => {
+  const boardLayout = useMemo(() => {
     const ranks = "87654321";
     const files = "abcdefgh";
-    const squares = [];
-
-    ranks.split("").forEach((rank, rankIndex) => {
-      files.split("").forEach((file, fileIndex) => {
+    return ranks.split("").flatMap((rank, rankIndex) =>
+      files.split("").map((file, fileIndex) => {
         const isDarkSquare = (rankIndex + fileIndex) % 2 === 1;
         const square = `${file}${rank}`;
-        squares.push(
+        const piece = boardState[square];
+        return (
           <Square
             key={square}
             position={square}
             isDarkSquare={isDarkSquare}
             ref={(el) => (squareRefs.current[square] = el)}
           >
-            {renderPiece(boardState[square], square)}
+            {piece ? (
+              <ChessPiece
+                type={piece.type}
+                color={piece.color}
+                position={square}
+                onDragEnd={onDragEnd}
+              />
+            ) : (
+              <EmptySquare />
+            )}
           </Square>
         );
-      });
-    });
-
-    return <div className="grid grid-cols-8">{squares}</div>;
-  };
+      })
+    );
+  }, [boardState, onDragEnd]);
 
   return (
-    <div className="flex flex-col md:flex-row justify-center items-center w-full h-full">
-      <div className="md:w-1/6 w-full px-4 py-2 md:py-0 md:px-2 md:order-1">
+    <Suspense fallback={<div>Loading...</div>}>
+      <div className="flex flex-col md:flex-row justify-center items-center w-full h-full">
         <ChessClock
           isActive={turn === "black" && gameStarted}
           time={blackTime}
           setTime={setBlackTime}
         />
-      </div>
-
-      <div className="flex-grow flex justify-center items-center p-4 md:order-2">
-        {renderBoard()}
-      </div>
-
-      <div className="md:w-1/6 w-full px-4 py-2 md:py-0 md:px-2 md:order-3">
+        <div className="grid grid-cols-8">{boardLayout}</div>
         <ChessClock
           isActive={turn === "white" && gameStarted}
           time={whiteTime}
           setTime={setWhiteTime}
         />
       </div>
-    </div>
+    </Suspense>
   );
 };
 
-export default Board;
+export default memo(Board);
