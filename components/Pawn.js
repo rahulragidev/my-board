@@ -17,6 +17,7 @@ const Pawn = memo(({ color, square, onDragEnd }) => {
       className="flex justify-center items-center relative cursor-grab"
       role="img"
       aria-label={`${color} pawn`}
+      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }} // Add drag constraints here
     >
       <Image
         src={`/images/pawn-${color}.svg`}

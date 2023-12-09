@@ -17,6 +17,7 @@ const Bishop = memo(({ color, square, onDragEnd }) => {
       className="flex justify-center items-center relative cursor-grab"
       role="img"
       aria-label={`${color} rook`}
+      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
     >
       <Image
         src={`/images/bishop-${color}.svg`}
