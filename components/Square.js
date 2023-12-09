@@ -1,9 +1,7 @@
 import React, { memo, forwardRef, useMemo } from "react";
 import { motion } from "framer-motion";
-
 const Square = memo(
   forwardRef(({ children, position, onClick }, ref) => {
-    // Optimized calculation for black square
     const isBlackSquare = useMemo(() => {
       const file = position.charCodeAt(0) - "a".charCodeAt(0);
       const rank = parseInt(position[1], 10) - 1;
@@ -20,7 +18,7 @@ const Square = memo(
         animate={{ opacity: 1 }}
         transition={{ duration: 0.2 }}
         className={`w-full aspect-square ${bgColor} ${hoverEffect} flex justify-center items-center`}
-        onClick={onClick}
+        onClick={() => onClick(position)} // Corrected here
       >
         {children}
       </motion.div>
@@ -29,5 +27,4 @@ const Square = memo(
 );
 
 Square.displayName = "Square";
-
 export default Square;

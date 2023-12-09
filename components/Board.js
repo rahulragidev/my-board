@@ -7,30 +7,11 @@ import React, {
   Suspense,
 } from "react";
 import Square from "./Square";
-import Rook from "./Rook"; // Consider using lazy loading if these components are heavy
-import Knight from "./Knight";
-import Bishop from "./Bishop";
-import Queen from "./Queen";
-import King from "./King";
-import Pawn from "./Pawn";
+import ChessPiece from "./ChessPiece";
 import EmptySquare from "./EmptySquare";
 import ChessClock from "./ChessClock";
 import { isMoveValid } from "./ChessUtils";
 import { motion } from "framer-motion";
-
-// Memoized component for chess pieces
-const ChessPiece = memo(({ type, color, position, onDragEnd }) => {
-  const PieceComponent = { Rook, Knight, Bishop, Queen, King, Pawn }[type];
-  return (
-    <motion.div
-      whileHover={{ scale: 1.1 }}
-      className="transition-all duration-300 ease-in-out"
-    >
-      <PieceComponent color={color} square={position} onDragEnd={onDragEnd} />
-    </motion.div>
-  );
-});
-ChessPiece.displayName = "ChessPiece";
 
 const createInitialBoard = () => {
   const ranks = "87654321";
@@ -74,9 +55,12 @@ const Board = () => {
   const [whiteTime, setWhiteTime] = useState(initialTime);
   const [blackTime, setBlackTime] = useState(initialTime);
   const squareRefs = useRef({});
+  const [selectedPiece, setSelectedPiece] = useState(null);
 
   const movePiece = useCallback(
     (fromSquare, toSquare) => {
+      console.log("From square : " + fromSquare);
+      console.log("To square : " + toSquare);
       if (isMoveValid(boardState, fromSquare, toSquare)) {
         const newBoardState = {
           ...boardState,
@@ -87,7 +71,32 @@ const Board = () => {
         setTurn(turn === "white" ? "black" : "white");
       }
     },
+    [boardState, turn, setBoardState, setTurn]
+  );
+
+  const selectPiece = useCallback(
+    (position) => {
+      console.log("Position " + position); // Debugging log
+      if (boardState[position] && boardState[position].color === turn) {
+        setSelectedPiece(position);
+      } else {
+        console.log("Piece selection invalid or not your turn"); // Additional debugging
+      }
+    },
     [boardState, turn]
+  );
+
+  const onSquareClick = useCallback(
+    (toSquare) => {
+      console.log("On Square Click :" + toSquare); // Debugging log
+      if (selectedPiece) {
+        movePiece(selectedPiece, toSquare);
+        setSelectedPiece(null);
+      } else {
+        console.log("No piece selected yet"); // Additional debugging
+      }
+    },
+    [selectedPiece, movePiece]
   );
 
   const onDragEnd = useCallback(
@@ -119,7 +128,7 @@ const Board = () => {
     return ranks.split("").flatMap((rank, rankIndex) =>
       files.split("").map((file, fileIndex) => {
         const isDarkSquare = (rankIndex + fileIndex) % 2 === 1;
-        const square = `${file}${rank}`;
+        const square = `${file}${rank}`; // This is the position of each square
         const piece = boardState[square];
         return (
           <Square
@@ -127,6 +136,7 @@ const Board = () => {
             position={square}
             isDarkSquare={isDarkSquare}
             ref={(el) => (squareRefs.current[square] = el)}
+            onClick={() => onSquareClick(square)}
           >
             {piece ? (
               <ChessPiece
@@ -134,6 +144,7 @@ const Board = () => {
                 color={piece.color}
                 position={square}
                 onDragEnd={onDragEnd}
+                selectPiece={selectPiece}
               />
             ) : (
               <EmptySquare />
@@ -142,7 +153,7 @@ const Board = () => {
         );
       })
     );
-  }, [boardState, onDragEnd]);
+  }, [boardState, onDragEnd, onSquareClick, selectPiece]); // Make sure dependencies are correct
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
