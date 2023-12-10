@@ -42,9 +42,6 @@ const GameHistory = ({ history }) => {
       animate="visible"
       transition={{ staggerChildren: 0.1 }}
     >
-      <h3 className="text-lg font-semibold text-center mb-4 text-gray-700">
-        Game History
-      </h3>
       <ul className="list-none space-y-2">
         {formatHistory().map(({ moveNumber, whiteMove, blackMove }, index) => (
           <motion.li

@@ -83,18 +83,31 @@ const Board = () => {
 
   const selectPiece = useCallback(
     (position) => {
-      console.log("Position " + position); // Debugging log
-      if (boardState[position] && boardState[position].color === turn) {
+      const clickedPiece = boardState[position];
+
+      // Check if the clicked position has a piece of the current player
+      if (clickedPiece && clickedPiece.color === turn) {
+        // Select the clicked piece
         setSelectedPiece(position);
+        console.log("Piece selected at position: " + position);
+      } else if (selectedPiece) {
+        // If another piece is already selected, attempt to move it to the clicked position
+        movePiece(selectedPiece, position);
+        setSelectedPiece(null); // Deselect the piece after attempting the move
       } else {
-        console.log("Piece selection invalid or not your turn"); // Additional debugging
+        console.log("Invalid selection or not your turn");
       }
     },
-    [boardState, turn]
+    [boardState, turn, selectedPiece, movePiece]
   );
 
   const onSquareClick = useCallback(
     (toSquare) => {
+      if (!gameStarted) {
+        setGameStarted(true);
+        setWhiteTime(initialTime);
+        setBlackTime(initialTime);
+      }
       console.log("On Square Click :" + toSquare); // Debugging log
       if (selectedPiece) {
         movePiece(selectedPiece, toSquare);
@@ -165,11 +178,6 @@ const Board = () => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <div className="flex flex-col lg:flex-row justify-center items-center w-full h-full p-4 gap-4">
-        <ChessClock
-          isActive={turn === "white" && gameStarted}
-          time={whiteTime}
-          setTime={setWhiteTime}
-        />
         <motion.div
           className="grid grid-cols-8 mt-4 mb-4 bg-gray-800 p-2 rounded-lg shadow-xl"
           initial={{ opacity: 0 }}
@@ -178,12 +186,19 @@ const Board = () => {
         >
           {boardLayout}
         </motion.div>
-        <ChessClock
-          isActive={turn === "black" && gameStarted}
-          time={blackTime}
-          setTime={setBlackTime}
-        />
-        <GameHistory history={gameHistory} className="lg:w-1/4 w-full" />
+        <div className="space-y-2">
+          <ChessClock
+            isActive={turn === "black" && gameStarted}
+            time={blackTime}
+            setTime={setBlackTime}
+          />
+          <GameHistory history={gameHistory} className="lg:w-1/4 w-full" />
+          <ChessClock
+            isActive={turn === "white" && gameStarted}
+            time={whiteTime}
+            setTime={setWhiteTime}
+          />
+        </div>
       </div>
     </Suspense>
   );
