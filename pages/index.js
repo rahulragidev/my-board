@@ -8,7 +8,7 @@ export default function Home() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}
-      className="flex flex-wrap items-center justify-center w-screen h-screen bg-gray-800 text-gray-200 overflow-x-auto overflow-y-auto"
+      className="flex flex-wrap items-center justify-center w-screen h-screen bg-white text-gray-800 overflow-x-auto overflow-y-auto"
     >
       <motion.div
         initial={{ x: -200, opacity: 0 }}

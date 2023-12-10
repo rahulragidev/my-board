@@ -12,6 +12,7 @@ import EmptySquare from "./EmptySquare";
 import ChessClock from "./ChessClock";
 import { isMoveValid } from "./ChessUtils";
 import { motion } from "framer-motion";
+import GameHistory from "./GameHistory";
 
 const createInitialBoard = () => {
   const ranks = "87654321";
@@ -56,6 +57,7 @@ const Board = () => {
   const [blackTime, setBlackTime] = useState(initialTime);
   const squareRefs = useRef({});
   const [selectedPiece, setSelectedPiece] = useState(null);
+  const [gameHistory, setGameHistory] = useState([]);
 
   const movePiece = useCallback(
     (fromSquare, toSquare) => {
@@ -69,9 +71,14 @@ const Board = () => {
         };
         setBoardState(newBoardState);
         setTurn(turn === "white" ? "black" : "white");
+        const movedPiece = boardState[fromSquare]?.type;
+        setGameHistory([
+          ...gameHistory,
+          { from: fromSquare, to: toSquare, piece: movedPiece },
+        ]);
       }
     },
-    [boardState, turn, setBoardState, setTurn]
+    [boardState, turn, gameHistory]
   );
 
   const selectPiece = useCallback(
@@ -157,21 +164,30 @@ const Board = () => {
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <div className="flex flex-col md:flex-row justify-center items-center w-full h-full">
-        <ChessClock
-          isActive={turn === "black" && gameStarted}
-          time={blackTime}
-          setTime={setBlackTime}
-        />
-        <div className="grid grid-cols-8">{boardLayout}</div>
+      <div className="flex flex-col lg:flex-row justify-center items-center w-full h-full p-4 gap-4">
         <ChessClock
           isActive={turn === "white" && gameStarted}
           time={whiteTime}
           setTime={setWhiteTime}
         />
+        <motion.div
+          className="grid grid-cols-8 mt-4 mb-4 bg-gray-800 p-2 rounded-lg shadow-xl"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          {boardLayout}
+        </motion.div>
+        <ChessClock
+          isActive={turn === "black" && gameStarted}
+          time={blackTime}
+          setTime={setBlackTime}
+        />
+        <GameHistory history={gameHistory} className="lg:w-1/4 w-full" />
       </div>
     </Suspense>
   );
 };
+
 Board.displayName = "Board";
 export default memo(Board);
