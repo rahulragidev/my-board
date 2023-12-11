@@ -8,7 +8,7 @@ const Square = memo(
       return (file + rank) % 2 === 1;
     }, [position]);
 
-    const bgColor = isBlackSquare ? "bg-green-800" : "bg-gray-200";
+    const bgColor = isBlackSquare ? "bg-green-700" : "bg-green-50";
     const hoverEffect = "hover:bg-opacity-75 transition duration-300";
 
     return (

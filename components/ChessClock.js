@@ -27,10 +27,10 @@ const ChessClock = ({ isActive, time, setTime }) => {
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className={`rounded-lg p-2 md:p-4 shadow-lg text-lg md:text-2xl lg:text-3xl font-bold border-4 w-32 h-20 ${
+      className={`rounded-lg p-2 md:p-4 shadow-md  w-1/4 text-md md:text-xl lg:text-2xl font-semibold border ${
         isActive
-          ? "text-orange-500 bg-black border-orange-500"
-          : "text-gray-100 bg-gray-700 border-gray-700"
+          ? "text-gray-100 bg-green-700 border-green-50"
+          : "text-gray-400 bg-green-50 border-green-700"
       } transition-colors duration-500 ease-in-out transform hover:scale-105`}
     >
       {formatTime(time)}

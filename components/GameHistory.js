@@ -37,17 +37,17 @@ const GameHistory = ({ history }) => {
 
   return (
     <motion.div
-      className="game-history w-96 h-96 mx-auto mt-8 p-4 border border-gray-400 rounded-lg shadow-lg overflow-y-scroll bg-white"
+      className="game-history w-96 h-96 mx-auto mt-2 p-1 rounded-lg shadow-lg overflow-y-scroll bg-gray-100"
       initial="hidden"
       animate="visible"
       transition={{ staggerChildren: 0.1 }}
     >
-      <ul className="list-none space-y-2">
+      <ul className="list-none space-y-1">
         {formatHistory().map(({ moveNumber, whiteMove, blackMove }, index) => (
           <motion.li
             key={moveNumber}
             className={`flex items-center justify-between px-2 py-1 rounded ${
-              index === history.length / 2 - 1 ? "bg-blue-200" : ""
+              index === history.length / 2 - 1 ? "bg-green-700" : ""
             }`}
             variants={listItemVariants}
           >
