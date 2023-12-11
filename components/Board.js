@@ -178,6 +178,7 @@ const Board = () => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <div className="flex flex-col lg:flex-row justify-center items-center w-full h-full p-4 gap-4">
+        {/* Chess Board */}
         <motion.div
           className="grid grid-cols-8 mt-4 mb-4 bg-gray-100 p-2 rounded-lg shadow-xl"
           initial={{ opacity: 0 }}
@@ -186,18 +187,34 @@ const Board = () => {
         >
           {boardLayout}
         </motion.div>
+
+        {/* Side Panel */}
         <div className="space-y-2">
-          <ChessClock
-            isActive={turn === "black" && gameStarted}
-            time={blackTime}
-            setTime={setBlackTime}
-          />
-          <GameHistory history={gameHistory} className="lg:w-1/4 w-full" />
-          <ChessClock
-            isActive={turn === "white" && gameStarted}
-            time={whiteTime}
-            setTime={setWhiteTime}
-          />
+          <div className="flex justify-between">
+            <ChessClock
+              playerColor="white"
+              isActive={turn === "white" && gameStarted}
+              time={whiteTime}
+              setTime={setWhiteTime}
+              className={
+                turn === "white" ? "bg-white text-black" : "bg-gray-300"
+              }
+            />
+            <ChessClock
+              playerColor="black"
+              isActive={turn === "black" && gameStarted}
+              time={blackTime}
+              setTime={setBlackTime}
+              className={
+                turn === "black" ? "bg-black text-white" : "bg-gray-300"
+              }
+            />
+          </div>
+          <div className="overflow-y-auto h-32 lg:h-64">
+            {" "}
+            {/* Scrollable Notation Container */}
+            <GameHistory history={gameHistory} className="lg:w-1/4 w-full" />
+          </div>
         </div>
       </div>
     </Suspense>

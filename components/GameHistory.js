@@ -1,7 +1,17 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 const GameHistory = ({ history }) => {
+  const historyRef = useRef(null);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (historyRef.current) {
+        historyRef.current.scrollTop = historyRef.current.scrollHeight;
+      }
+    }, 100); // Adjust delay as needed
+  }, [history]);
+
   // Convert move data to standard chess notation
   const toChessNotation = (move) => {
     let notation = "";
@@ -37,7 +47,8 @@ const GameHistory = ({ history }) => {
 
   return (
     <motion.div
-      className="game-history w-96 h-96 mx-auto mt-2 p-1 rounded-lg shadow-lg overflow-y-scroll bg-gray-100"
+      ref={historyRef} // Attach the ref to the container
+      className="game-history w-96 md:h-96 mx-auto mt-2 p-1 rounded-lg shadow-lg overflow-y-scroll bg-gray-100"
       initial="hidden"
       animate="visible"
       transition={{ staggerChildren: 0.1 }}
