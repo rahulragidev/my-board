@@ -29,12 +29,12 @@ const createInitialBoard = () => {
       if (rank === "8" || rank === "1") {
         const order = [
           "Rook",
-          "Night",
+          "Knight",
           "Bishop",
           "Queen",
           "King",
           "Bishop",
-          "Night",
+          "Knight",
           "Rook",
         ];
         piece = { type: order[files.indexOf(file)], color };

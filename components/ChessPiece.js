@@ -1,6 +1,6 @@
 import { memo } from "react";
 import Rook from "./Rook"; // Consider using lazy loading if these components are heavy
-import Night from "./Night";
+import Knight from "./Knight";
 import Bishop from "./Bishop";
 import Queen from "./Queen";
 import King from "./King";
@@ -8,7 +8,7 @@ import Pawn from "./Pawn";
 import { motion } from "framer-motion";
 
 const ChessPiece = memo(({ type, color, position, onDragEnd, selectPiece }) => {
-  const PieceComponent = { Rook, Night, Bishop, Queen, King, Pawn }[type];
+  const PieceComponent = { Rook, Knight, Bishop, Queen, King, Pawn }[type];
 
   // Added event propagation handling
   const handleClick = (e) => {

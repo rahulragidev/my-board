@@ -3,7 +3,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { debounce } from "lodash";
 
-const Night = memo(({ color, square, onDragEnd }) => {
+const Knight = memo(({ color, square, onDragEnd }) => {
   const debouncedOnDragEnd = debounce((event, info) => {
     onDragEnd(color, square, info.point.x, info.point.y);
   }, 100); // Adjust debounce time as needed
@@ -31,5 +31,5 @@ const Night = memo(({ color, square, onDragEnd }) => {
   );
 });
 
-Night.displayName = "Night";
-export default Night;
+Knight.displayName = "Knight";
+export default Knight;

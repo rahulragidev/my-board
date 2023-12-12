@@ -17,7 +17,7 @@ export const isMoveValid = (boardState, fromSquare, toSquare) => {
   switch (movingPiece.type) {
     case "Rook":
       return isRookMoveValid(boardState, fromSquare, toSquare);
-    case "Night":
+    case "Knight":
       return isKnightMoveValid(fromSquare, toSquare);
     case "Bishop":
       return isBishopMoveValid(boardState, fromSquare, toSquare);
