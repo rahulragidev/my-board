@@ -10,22 +10,22 @@ export default function Home() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 5 }}
+      transition={{ duration: 2 }} // Shortened duration for smoother transition
       className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800"
     >
       {!isLogoAnimated && (
         <motion.div
           initial={{ scale: 6, opacity: 0, rotate: 360 }}
-          animate={{ scale: 2, opacity: 1, rotate: 0 }}
+          animate={{ scale: 1, opacity: 1, rotate: 0 }}
           exit={{ scale: 0.2, opacity: 0.5, top: 20, left: 20 }}
-          transition={{ delay: 0.0, duration: 5.0, type: "spring" }}
+          transition={{ duration: 2, type: "spring" }} // Adjusted for smoother animation
           onAnimationComplete={() => setIsLogoAnimated(true)}
-          className="absolute inset-0 flex items-center justify-center"
+          className="fixed inset-0 flex items-center justify-center z-50" // Ensured full coverage and higher z-index
         >
           <Image
             src="/images/logo.png"
             alt="Logo"
-            width={200}
+            width={200} // Adjusted image size
             height={200}
             className="rounded-full shadow-md"
           />
