@@ -10,7 +10,7 @@ import Square from "./Square";
 import ChessPiece from "./ChessPiece";
 import EmptySquare from "./EmptySquare";
 import CombinedChessClock from "./CombinedChessClock";
-import { isMoveValid } from "./ChessUtils";
+import { isMoveValid } from "../utils/ChessUtils";
 import { motion } from "framer-motion";
 import GameHistory from "./GameHistory";
 
