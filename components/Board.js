@@ -115,7 +115,7 @@ const Board = () => {
           ...prevHistory,
           { from: fromSquare, to: toSquare, piece: movedPiece },
         ]);
-      } else if (!isMoveValid) {
+      } else {
         playErrorSound();
       }
     },
