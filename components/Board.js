@@ -91,6 +91,17 @@ const Board = () => {
     });
   }, [boardState, turn, gameStarted, whiteTime, blackTime, gameHistory]);
 
+  const resetGame = () => {
+    setBoardState(createInitialBoard());
+    setTurn("white");
+    setGameStarted(false);
+    setWhiteTime(initialTime);
+    setBlackTime(initialTime);
+    setGameHistory([]);
+    setSelectedPiece(null);
+    // Add other state resets if necessary
+  };
+
   const playErrorSound = () => {
     new Audio("/sounds/illegal.mp3").play();
   };
@@ -218,6 +229,26 @@ const Board = () => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <div className="flex flex-col lg:flex-row justify-center items-center w-full h-full p-2 gap-4">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={resetGame}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold text-xs py-1 px-2 rounded absolute top-2 right-2"
+          title="New Game"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path d="M6 18L18 6M6 6l12 12"></path>{" "}
+            {/* This is a sample icon for a reset symbol */}
+          </svg>
+        </motion.button>
         <motion.div
           className="grid grid-cols-8 mt-4 mb-4 bg-gray-100 p-2 rounded-lg shadow-xl"
           initial={{ opacity: 0 }}
