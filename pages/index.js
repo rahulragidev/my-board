@@ -10,7 +10,7 @@ export default function Home() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 2 }}
+      transition={{ duration: 5 }}
       className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800"
     >
       {!isLogoAnimated && (
@@ -18,7 +18,7 @@ export default function Home() {
           initial={{ scale: 6, opacity: 0, rotate: 360 }}
           animate={{ scale: 2, opacity: 1, rotate: 0 }}
           exit={{ scale: 0.2, opacity: 0.5, top: 20, left: 20 }}
-          transition={{ delay: 5.0, duration: 3.5, type: "spring" }}
+          transition={{ delay: 0.0, duration: 5.0, type: "spring" }}
           onAnimationComplete={() => setIsLogoAnimated(true)}
           className="absolute inset-0 flex items-center justify-center"
         >
