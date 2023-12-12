@@ -18,7 +18,7 @@ export default function Home() {
           initial={{ scale: 6, opacity: 0, rotate: 360 }}
           animate={{ scale: 2, opacity: 1, rotate: 0 }}
           exit={{ scale: 0.2, opacity: 0.5, top: 20, left: 20 }}
-          transition={{ delay: 0.5, duration: 3.5, type: "spring" }}
+          transition={{ delay: 5.0, duration: 3.5, type: "spring" }}
           onAnimationComplete={() => setIsLogoAnimated(true)}
           className="absolute inset-0 flex items-center justify-center"
         >
