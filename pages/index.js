@@ -17,8 +17,8 @@ export default function Home() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
-      className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800"
+      transition={{ duration: 2 }}
+      className="flex flex-col items-center justify-center w-full h-full bg-white text-gray-800"
     >
       <motion.div
         initial={{ scale: 6, opacity: 0, rotate: 360 }}
