@@ -5,6 +5,7 @@ import React, {
   useMemo,
   Suspense,
   memo,
+  useEffect,
 } from "react";
 import Square from "./Square";
 import ChessPiece from "./ChessPiece";
@@ -48,16 +49,47 @@ const createInitialBoard = () => {
   return board;
 };
 
+const loadGameFromLocalStorage = () => {
+  const savedGame = localStorage.getItem("chessGameState");
+  return savedGame ? JSON.parse(savedGame) : null;
+};
+
+const saveGameToLocalStorage = (gameState) => {
+  localStorage.setItem("chessGameState", JSON.stringify(gameState));
+};
+
+const initialTime = 900; // 15 minutes in seconds
+const defaultGameState = {
+  boardState: createInitialBoard(),
+  turn: "white",
+  gameStarted: false,
+  whiteTime: initialTime,
+  blackTime: initialTime,
+  gameHistory: [],
+};
+
 const Board = () => {
-  const initialTime = 900; // 15 minutes in seconds
-  const [boardState, setBoardState] = useState(createInitialBoard());
-  const [turn, setTurn] = useState("white");
-  const [gameStarted, setGameStarted] = useState(false);
-  const [whiteTime, setWhiteTime] = useState(initialTime);
-  const [blackTime, setBlackTime] = useState(initialTime);
+  const loadedGameState = loadGameFromLocalStorage() || defaultGameState;
+
+  const [boardState, setBoardState] = useState(loadedGameState.boardState);
+  const [turn, setTurn] = useState(loadedGameState.turn);
+  const [gameStarted, setGameStarted] = useState(loadedGameState.gameStarted);
+  const [whiteTime, setWhiteTime] = useState(loadedGameState.whiteTime);
+  const [blackTime, setBlackTime] = useState(loadedGameState.blackTime);
+  const [gameHistory, setGameHistory] = useState(loadedGameState.gameHistory);
   const [selectedPiece, setSelectedPiece] = useState(null);
-  const [gameHistory, setGameHistory] = useState([]);
   const squareRefs = useRef({});
+
+  useEffect(() => {
+    saveGameToLocalStorage({
+      boardState,
+      turn,
+      gameStarted,
+      whiteTime,
+      blackTime,
+      gameHistory,
+    });
+  }, [boardState, turn, gameStarted, whiteTime, blackTime, gameHistory]);
 
   const playErrorSound = () => {
     new Audio("/sounds/illegal.mp3").play();
