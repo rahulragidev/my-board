@@ -25,10 +25,11 @@ export default function Home() {
         animate={{ scale: 2, opacity: 1, rotate: 0 }}
         exit={{ scale: 0.3, opacity: 0.5, top: 20, left: 20 }}
         transition={{ delay: 0.5, duration: 0.5, type: "spring" }}
-        className={`absolute top-0 left-0 w-full h-full flex items-center justify-center ${
+        className={`absolute inset-0 flex items-center justify-center ${
           animateLogo ? "" : "hidden"
-        }`} // Reduced opacity and positioning for the logo after animation
+        }`}
       >
+        {/* Responsive image for different screen sizes */}
         <Image
           src="/images/logo.png"
           alt="Logo"
@@ -42,7 +43,7 @@ export default function Home() {
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 1.5, duration: 0.7 }}
-        className="w-full px-2 mt-16"
+        className="w-full px-2 mt-4"
       >
         <Board />
       </motion.div>
