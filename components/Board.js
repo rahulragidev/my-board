@@ -59,9 +59,18 @@ const Board = () => {
   const [gameHistory, setGameHistory] = useState([]);
   const squareRefs = useRef({});
 
+  const playErrorSound = () => {
+    new Audio("/sounds/illegal.mp3").play();
+  };
+
+  const playMoveSound = () => {
+    new Audio("/sounds/move-self.mp3").play();
+  };
+
   const movePiece = useCallback(
     (fromSquare, toSquare) => {
       if (isMoveValid(boardState, fromSquare, toSquare)) {
+        playMoveSound();
         const newBoardState = {
           ...boardState,
           [toSquare]: boardState[fromSquare],
@@ -74,6 +83,8 @@ const Board = () => {
           ...prevHistory,
           { from: fromSquare, to: toSquare, piece: movedPiece },
         ]);
+      } else if (!isMoveValid) {
+        playErrorSound();
       }
     },
     [boardState]
