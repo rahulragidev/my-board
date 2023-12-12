@@ -5,11 +5,12 @@ const GameHistory = ({ history }) => {
   const historyRef = useRef(null);
 
   useEffect(() => {
-    setTimeout(() => {
-      if (historyRef.current) {
-        historyRef.current.scrollTop = historyRef.current.scrollHeight;
-      }
-    }, 100); // Adjust delay as needed
+    if (historyRef.current) {
+      historyRef.current.scrollTo({
+        top: historyRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [history]);
 
   // Convert move data to standard chess notation
@@ -45,50 +46,72 @@ const GameHistory = ({ history }) => {
     visible: { opacity: 1, x: 0 },
   };
 
+  const loadingDotsVariants = {
+    animate: {
+      opacity: [0, 1, 0],
+      transition: { repeat: Infinity, duration: 1.2 },
+    },
+  };
+
   return (
-    <motion.div
-      ref={historyRef} // Attach the ref to the container
-      className="game-history w-96 md:h-96 mx-auto mt-2 p-1 rounded-lg shadow-lg overflow-y-scroll bg-gray-100"
-      initial="hidden"
-      animate="visible"
-      transition={{ staggerChildren: 0.1 }}
-    >
-      <ul className="list-none space-y-1">
-        {formatHistory().map(({ moveNumber, whiteMove, blackMove }, index) => (
-          <motion.li
-            key={moveNumber}
-            className={`flex items-center justify-between px-2 py-1 rounded ${
-              index === history.length / 2 - 1 ? "bg-green-700" : ""
-            }`}
-            variants={listItemVariants}
-          >
-            <div className="flex-1 flex items-center space-x-2">
-              <span className="font-semibold">{moveNumber}.</span>
-              <div className="w-full bg-gray-100 p-2 rounded">
-                <span
-                  className={`font-medium ${
-                    whiteMove ? "text-black" : "text-gray-400"
-                  }`}
-                >
-                  {whiteMove || "..."}
+    <div className="relative max-w-md mx-auto my-4">
+      <motion.div
+        ref={historyRef}
+        className="game-history relative p-4 rounded-lg shadow-md overflow-y-auto bg-gray-50 border border-gray-200"
+        initial="hidden"
+        animate="visible"
+        transition={{ staggerChildren: 0.1 }}
+        style={{ maxHeight: "300px" }} // Adjust height as needed
+      >
+        <ul className="space-y-3">
+          {formatHistory().map(
+            ({ moveNumber, whiteMove, blackMove }, index) => (
+              <motion.li
+                key={moveNumber}
+                className="flex items-center justify-between bg-white rounded-lg px-4 py-3 shadow-sm"
+                variants={listItemVariants}
+              >
+                <span className="font-semibold text-gray-800">
+                  {moveNumber}.
                 </span>
-              </div>
-            </div>
-            <div className="flex-1 flex items-center space-x-2">
-              <div className="w-full bg-gray-200 p-2 rounded">
-                <span
-                  className={`font-medium ${
-                    blackMove ? "text-gray-800" : "text-gray-400"
-                  }`}
-                >
-                  {blackMove || "..."}
-                </span>
-              </div>
-            </div>
-          </motion.li>
-        ))}
-      </ul>
-    </motion.div>
+                <div className="flex-1 flex justify-between ml-4">
+                  <span
+                    className={`font-medium ${
+                      whiteMove ? "text-black" : "text-gray-400"
+                    }`}
+                  >
+                    {whiteMove || (
+                      <motion.span
+                        variants={loadingDotsVariants}
+                        animate="animate"
+                      >
+                        ...
+                      </motion.span>
+                    )}
+                  </span>
+                  <span
+                    className={`font-medium ${
+                      blackMove ? "text-black" : "text-gray-400"
+                    }`}
+                  >
+                    {blackMove || (
+                      <motion.span
+                        variants={loadingDotsVariants}
+                        animate="animate"
+                      >
+                        ...
+                      </motion.span>
+                    )}
+                  </span>
+                </div>
+              </motion.li>
+            )
+          )}
+        </ul>
+        <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-gray-50 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-50 to-transparent"></div>
+      </motion.div>
+    </div>
   );
 };
 

@@ -1,15 +1,15 @@
 import React, {
   useState,
   useRef,
-  memo,
   useCallback,
   useMemo,
   Suspense,
+  memo,
 } from "react";
 import Square from "./Square";
 import ChessPiece from "./ChessPiece";
 import EmptySquare from "./EmptySquare";
-import ChessClock from "./ChessClock";
+import CombinedChessClock from "./CombinedChessClock";
 import { isMoveValid } from "./ChessUtils";
 import { motion } from "framer-motion";
 import GameHistory from "./GameHistory";
@@ -28,12 +28,12 @@ const createInitialBoard = () => {
       if (rank === "8" || rank === "1") {
         const order = [
           "Rook",
-          "Knight",
+          "Night",
           "Bishop",
           "Queen",
           "King",
           "Bishop",
-          "Knight",
+          "Night",
           "Rook",
         ];
         piece = { type: order[files.indexOf(file)], color };
@@ -49,20 +49,18 @@ const createInitialBoard = () => {
 };
 
 const Board = () => {
+  const initialTime = 900; // 15 minutes in seconds
   const [boardState, setBoardState] = useState(createInitialBoard());
   const [turn, setTurn] = useState("white");
   const [gameStarted, setGameStarted] = useState(false);
-  const initialTime = 900;
   const [whiteTime, setWhiteTime] = useState(initialTime);
   const [blackTime, setBlackTime] = useState(initialTime);
-  const squareRefs = useRef({});
   const [selectedPiece, setSelectedPiece] = useState(null);
   const [gameHistory, setGameHistory] = useState([]);
+  const squareRefs = useRef({});
 
   const movePiece = useCallback(
     (fromSquare, toSquare) => {
-      console.log("From square : " + fromSquare);
-      console.log("To square : " + toSquare);
       if (isMoveValid(boardState, fromSquare, toSquare)) {
         const newBoardState = {
           ...boardState,
@@ -70,32 +68,25 @@ const Board = () => {
           [fromSquare]: null,
         };
         setBoardState(newBoardState);
-        setTurn(turn === "white" ? "black" : "white");
+        setTurn((prevTurn) => (prevTurn === "white" ? "black" : "white"));
         const movedPiece = boardState[fromSquare]?.type;
-        setGameHistory([
-          ...gameHistory,
+        setGameHistory((prevHistory) => [
+          ...prevHistory,
           { from: fromSquare, to: toSquare, piece: movedPiece },
         ]);
       }
     },
-    [boardState, turn, gameHistory]
+    [boardState]
   );
 
   const selectPiece = useCallback(
     (position) => {
       const clickedPiece = boardState[position];
-
-      // Check if the clicked position has a piece of the current player
       if (clickedPiece && clickedPiece.color === turn) {
-        // Select the clicked piece
         setSelectedPiece(position);
-        console.log("Piece selected at position: " + position);
       } else if (selectedPiece) {
-        // If another piece is already selected, attempt to move it to the clicked position
         movePiece(selectedPiece, position);
-        setSelectedPiece(null); // Deselect the piece after attempting the move
-      } else {
-        console.log("Invalid selection or not your turn");
+        setSelectedPiece(null);
       }
     },
     [boardState, turn, selectedPiece, movePiece]
@@ -105,18 +96,13 @@ const Board = () => {
     (toSquare) => {
       if (!gameStarted) {
         setGameStarted(true);
-        setWhiteTime(initialTime);
-        setBlackTime(initialTime);
       }
-      console.log("On Square Click :" + toSquare); // Debugging log
       if (selectedPiece) {
         movePiece(selectedPiece, toSquare);
         setSelectedPiece(null);
-      } else {
-        console.log("No piece selected yet"); // Additional debugging
       }
     },
-    [selectedPiece, movePiece]
+    [gameStarted, selectedPiece, movePiece]
   );
 
   const onDragEnd = useCallback(
@@ -128,15 +114,26 @@ const Board = () => {
         setBlackTime(initialTime);
       }
 
-      const toSquare = Object.keys(squareRefs.current).find((square) => {
-        const rect = squareRefs.current[square].getBoundingClientRect();
-        return (
-          x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
-        );
-      });
+      const closestSquare = Object.keys(squareRefs.current).reduce(
+        (closest, square) => {
+          const rect = squareRefs.current[square].getBoundingClientRect();
+          const squareCenterX = rect.left + rect.width / 2;
+          const squareCenterY = rect.top + rect.height / 2;
+          const distance = Math.sqrt(
+            Math.pow(x - squareCenterX, 2) + Math.pow(y - squareCenterY, 2)
+          );
 
-      if (toSquare) {
-        movePiece(fromSquare, toSquare);
+          if (!closest || distance < closest.distance) {
+            return { square, distance };
+          }
+
+          return closest;
+        },
+        null
+      );
+
+      if (closestSquare) {
+        movePiece(fromSquare, closestSquare.square);
       }
     },
     [turn, gameStarted, movePiece]
@@ -173,12 +170,11 @@ const Board = () => {
         );
       })
     );
-  }, [boardState, onDragEnd, onSquareClick, selectPiece]); // Make sure dependencies are correct
+  }, [boardState, onDragEnd, onSquareClick, selectPiece]);
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <div className="flex flex-col lg:flex-row justify-center items-center w-full h-full p-4 gap-4">
-        {/* Chess Board */}
         <motion.div
           className="grid grid-cols-8 mt-4 mb-4 bg-gray-100 p-2 rounded-lg shadow-xl"
           initial={{ opacity: 0 }}
@@ -187,32 +183,16 @@ const Board = () => {
         >
           {boardLayout}
         </motion.div>
-
-        {/* Side Panel */}
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <ChessClock
-              playerColor="white"
-              isActive={turn === "white" && gameStarted}
-              time={whiteTime}
-              setTime={setWhiteTime}
-              className={
-                turn === "white" ? "bg-white text-black" : "bg-gray-300"
-              }
-            />
-            <ChessClock
-              playerColor="black"
-              isActive={turn === "black" && gameStarted}
-              time={blackTime}
-              setTime={setBlackTime}
-              className={
-                turn === "black" ? "bg-black text-white" : "bg-gray-300"
-              }
-            />
-          </div>
+        <div className="space-y-2 w-full md:w-1/4">
+          <CombinedChessClock
+            gameStarted={gameStarted}
+            whiteTime={whiteTime}
+            blackTime={blackTime}
+            turn={turn}
+            setWhiteTime={setWhiteTime}
+            setBlackTime={setBlackTime}
+          />
           <div className="overflow-y-auto h-32 lg:h-64">
-            {" "}
-            {/* Scrollable Notation Container */}
             <GameHistory history={gameHistory} className="lg:w-1/4 w-full" />
           </div>
         </div>
@@ -221,5 +201,4 @@ const Board = () => {
   );
 };
 
-Board.displayName = "Board";
 export default memo(Board);
