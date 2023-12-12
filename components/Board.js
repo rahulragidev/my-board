@@ -185,7 +185,7 @@ const Board = () => {
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <div className="flex flex-col lg:flex-row justify-center items-center w-full h-full p-4 gap-4">
+      <div className="flex flex-col lg:flex-row justify-center items-center w-full h-full p-2">
         <motion.div
           className="grid grid-cols-8 mt-4 mb-4 bg-gray-100 p-2 rounded-lg shadow-xl"
           initial={{ opacity: 0 }}
