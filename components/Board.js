@@ -89,6 +89,16 @@ const Board = () => {
   const [checkMate, setCheckMate] = useState(false);
 
   useEffect(() => {
+    const clearCookies = () => {
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+    };
+
+    // Clear cookies on component mount
+    clearCookies();
     saveGameToLocalStorage({
       boardState,
       turn,
