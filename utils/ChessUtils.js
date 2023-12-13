@@ -249,7 +249,7 @@ const isKingMoveValid = (boardState, fromSquare, toSquare, checkCheck) => {
     fromSquare.length !== 2 ||
     toSquare.length !== 2
   ) {
-    return false;
+    return true;
   }
 
   const fromFile = fromSquare.charCodeAt(0);
