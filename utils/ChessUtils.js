@@ -2,6 +2,7 @@ export const isMoveValid = (boardState, fromSquare, toSquare) => {
   const movingPiece = boardState[fromSquare];
   const targetPiece = boardState[toSquare];
 
+  // Early checks before simulating the move
   if (!movingPiece || fromSquare === toSquare) {
     return false;
   }
@@ -14,6 +15,20 @@ export const isMoveValid = (boardState, fromSquare, toSquare) => {
     return false;
   }
 
+  // Simulate the move
+  const tempBoardState = {
+    ...boardState,
+    [toSquare]: movingPiece,
+    [fromSquare]: null,
+  };
+
+  // Check if this move puts your own king in check
+  const ownKingColor = movingPiece.color;
+  if (isKingInCheck(tempBoardState, ownKingColor)) {
+    return false; // Move is not valid as it leaves or puts your king in check
+  }
+
+  // Continue with the rest of your move validation logic
   switch (movingPiece.type) {
     case "Rook":
       return isRookMoveValid(boardState, fromSquare, toSquare);
@@ -35,6 +50,36 @@ export const isMoveValid = (boardState, fromSquare, toSquare) => {
     default:
       return false;
   }
+};
+
+// In your ChessUtils.js or a similar utility file
+
+const findKingPosition = (boardState, kingColor) => {
+  for (let square in boardState) {
+    const piece = boardState[square];
+    if (piece && piece.type === "King" && piece.color === kingColor) {
+      return square;
+    }
+  }
+  return null; // King not found (should never happen in a valid game)
+};
+
+const isUnderAttack = (boardState, position, enemyColor) => {
+  for (let square in boardState) {
+    const piece = boardState[square];
+    if (piece && piece.color === enemyColor) {
+      if (isMoveValid(boardState, square, position, true)) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
+export const isKingInCheck = (boardState, kingColor) => {
+  const kingPosition = findKingPosition(boardState, kingColor);
+  const enemyColor = kingColor === "white" ? "black" : "white";
+  return isUnderAttack(boardState, kingPosition, enemyColor);
 };
 
 const isWithinBoardBounds = (square) => {

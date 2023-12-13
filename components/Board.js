@@ -11,7 +11,7 @@ import Square from "./Square";
 import ChessPiece from "./ChessPiece";
 import EmptySquare from "./EmptySquare";
 import CombinedChessClock from "./CombinedChessClock";
-import { isMoveValid } from "../utils/ChessUtils";
+import { isKingInCheck, isMoveValid } from "../utils/ChessUtils";
 import { motion } from "framer-motion";
 import GameHistory from "./GameHistory";
 
@@ -79,6 +79,7 @@ const Board = () => {
   const [gameHistory, setGameHistory] = useState(loadedGameState.gameHistory);
   const [selectedPiece, setSelectedPiece] = useState(null);
   const squareRefs = useRef({});
+  const [isInCheck, setIsInCheck] = useState(false);
 
   useEffect(() => {
     saveGameToLocalStorage({
@@ -89,6 +90,9 @@ const Board = () => {
       blackTime,
       gameHistory,
     });
+
+    const currentCheckState = isKingInCheck(boardState, turn);
+    setIsInCheck(currentCheckState);
   }, [boardState, turn, gameStarted, whiteTime, blackTime, gameHistory]);
 
   const resetGame = () => {
