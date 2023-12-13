@@ -83,7 +83,7 @@ export const isCheckmate = (boardState, kingColor) => {
 
 // In your ChessUtils.js or a similar utility file
 
-const findKingPosition = (boardState, kingColor) => {
+export const findKingPosition = (boardState, kingColor) => {
   for (let square in boardState) {
     const piece = boardState[square];
     if (piece && piece.type === "King" && piece.color === kingColor) {

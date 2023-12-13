@@ -11,7 +11,12 @@ import Square from "./Square";
 import ChessPiece from "./ChessPiece";
 import EmptySquare from "./EmptySquare";
 import CombinedChessClock from "./CombinedChessClock";
-import { isKingInCheck, isMoveValid, isCheckmate } from "../utils/ChessUtils";
+import {
+  isKingInCheck,
+  isMoveValid,
+  isCheckmate,
+  findKingPosition,
+} from "../utils/ChessUtils";
 import { motion } from "framer-motion";
 import GameHistory from "./GameHistory";
 import GameOver from "./GameOver";
@@ -230,6 +235,7 @@ const Board = () => {
   const boardLayout = useMemo(() => {
     const ranks = "87654321";
     const files = "abcdefgh";
+    const kingPosition = isInCheck ? findKingPosition(boardState, turn) : null;
     return ranks.split("").flatMap((rank, rankIndex) =>
       files.split("").map((file, fileIndex) => {
         const isDarkSquare = (rankIndex + fileIndex) % 2 === 1;
@@ -242,6 +248,7 @@ const Board = () => {
             isDarkSquare={isDarkSquare}
             ref={(el) => (squareRefs.current[square] = el)}
             onClick={() => onSquareClick(square)}
+            isKingInCheckSquare={square === kingPosition}
           >
             {piece ? (
               <ChessPiece
