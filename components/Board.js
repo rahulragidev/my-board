@@ -11,9 +11,10 @@ import Square from "./Square";
 import ChessPiece from "./ChessPiece";
 import EmptySquare from "./EmptySquare";
 import CombinedChessClock from "./CombinedChessClock";
-import { isKingInCheck, isMoveValid } from "../utils/ChessUtils";
+import { isKingInCheck, isMoveValid, isCheckmate } from "../utils/ChessUtils";
 import { motion } from "framer-motion";
 import GameHistory from "./GameHistory";
+import GameOver from "./GameOver";
 
 const createInitialBoard = () => {
   const ranks = "87654321";
@@ -58,7 +59,7 @@ const saveGameToLocalStorage = (gameState) => {
   localStorage.setItem("chessGameState", JSON.stringify(gameState));
 };
 
-const initialTime = 900; // 15 minutes in seconds
+const initialTime = 900;
 const defaultGameState = {
   boardState: createInitialBoard(),
   turn: "white",
@@ -80,6 +81,7 @@ const Board = () => {
   const [selectedPiece, setSelectedPiece] = useState(null);
   const squareRefs = useRef({});
   const [isInCheck, setIsInCheck] = useState(false);
+  const [checkMate, setCheckMate] = useState(false);
 
   useEffect(() => {
     saveGameToLocalStorage({
@@ -93,6 +95,8 @@ const Board = () => {
 
     const currentCheckState = isKingInCheck(boardState, turn);
     setIsInCheck(currentCheckState);
+    const opponentColor = turn === "white" ? "black" : "white";
+    setCheckMate(isCheckmate(boardState, opponentColor));
   }, [boardState, turn, gameStarted, whiteTime, blackTime, gameHistory]);
 
   const resetGame = () => {
@@ -103,6 +107,8 @@ const Board = () => {
     setBlackTime(initialTime);
     setGameHistory([]);
     setSelectedPiece(null);
+    setCheckMate(false);
+    setIsInCheck(false);
     // Add other state resets if necessary
   };
 
@@ -116,13 +122,37 @@ const Board = () => {
 
   const movePiece = useCallback(
     (fromSquare, toSquare) => {
+      const movingPiece = boardState[fromSquare];
+
       if (isMoveValid(boardState, fromSquare, toSquare)) {
         playMoveSound();
+
+        // Prepare the new board state
         const newBoardState = {
           ...boardState,
-          [toSquare]: boardState[fromSquare],
+          [toSquare]: { ...movingPiece, hasMoved: true }, // Mark the piece as having moved
           [fromSquare]: null,
         };
+
+        // Handle castling move
+        if (
+          movingPiece.type === "King" &&
+          Math.abs(fromSquare.charCodeAt(0) - toSquare.charCodeAt(0)) === 2
+        ) {
+          const isKingSide = toSquare === "g1" || toSquare === "g8";
+          const rookFromFile = isKingSide ? "h" : "a";
+          const rookToFile = isKingSide ? "f" : "d";
+          const rank = fromSquare[1];
+
+          // Move the rook in the case of castling
+          newBoardState[`${rookToFile}${rank}`] = {
+            ...newBoardState[`${rookFromFile}${rank}`],
+            hasMoved: true,
+          };
+          newBoardState[`${rookFromFile}${rank}`] = null;
+        }
+
+        // Update board state, turn, and game history
         setBoardState(newBoardState);
         setTurn((prevTurn) => (prevTurn === "white" ? "black" : "white"));
         const movedPiece = boardState[fromSquare]?.type;
@@ -134,7 +164,7 @@ const Board = () => {
         playErrorSound();
       }
     },
-    [boardState]
+    [boardState, playMoveSound, playErrorSound, setGameHistory, setTurn]
   );
 
   const selectPiece = useCallback(
@@ -232,6 +262,7 @@ const Board = () => {
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
+      {checkMate && <GameOver onNewGame={resetGame} />}
       <div className="flex flex-col lg:flex-row justify-center items-center w-full h-full p-2 gap-4">
         <motion.button
           whileHover={{ scale: 1.1 }}

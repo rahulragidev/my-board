@@ -1,4 +1,9 @@
-export const isMoveValid = (boardState, fromSquare, toSquare) => {
+export const isMoveValid = (
+  boardState,
+  fromSquare,
+  toSquare,
+  checkCheck = true
+) => {
   const movingPiece = boardState[fromSquare];
   const targetPiece = boardState[toSquare];
 
@@ -15,7 +20,6 @@ export const isMoveValid = (boardState, fromSquare, toSquare) => {
     return false;
   }
 
-  // Simulate the move
   const tempBoardState = {
     ...boardState,
     [toSquare]: movingPiece,
@@ -23,12 +27,11 @@ export const isMoveValid = (boardState, fromSquare, toSquare) => {
   };
 
   // Check if this move puts your own king in check
-  const ownKingColor = movingPiece.color;
-  if (isKingInCheck(tempBoardState, ownKingColor)) {
-    return false; // Move is not valid as it leaves or puts your king in check
+  if (checkCheck && isKingInCheck(tempBoardState, movingPiece.color)) {
+    return false;
   }
 
-  // Continue with the rest of your move validation logic
+  // Individual piece move validation
   switch (movingPiece.type) {
     case "Rook":
       return isRookMoveValid(boardState, fromSquare, toSquare);
@@ -50,6 +53,32 @@ export const isMoveValid = (boardState, fromSquare, toSquare) => {
     default:
       return false;
   }
+};
+
+export const isCheckmate = (boardState, kingColor) => {
+  if (!isKingInCheck(boardState, kingColor)) {
+    return false;
+  }
+
+  for (let fromSquare in boardState) {
+    const piece = boardState[fromSquare];
+    if (piece && piece.color === kingColor) {
+      for (let toSquare in boardState) {
+        if (isMoveValid(boardState, fromSquare, toSquare, false)) {
+          const tempBoardState = {
+            ...boardState,
+            [toSquare]: piece,
+            [fromSquare]: null,
+          };
+          if (!isKingInCheck(tempBoardState, kingColor)) {
+            return false; // There's a move that can take the king out of check
+          }
+        }
+      }
+    }
+  }
+
+  return true; // No moves can take the king out of check
 };
 
 // In your ChessUtils.js or a similar utility file
@@ -78,6 +107,7 @@ const isUnderAttack = (boardState, position, enemyColor) => {
 
 export const isKingInCheck = (boardState, kingColor) => {
   const kingPosition = findKingPosition(boardState, kingColor);
+
   const enemyColor = kingColor === "white" ? "black" : "white";
   return isUnderAttack(boardState, kingPosition, enemyColor);
 };
@@ -211,23 +241,65 @@ const isQueenMoveValid = (boardState, fromSquare, toSquare) => {
   return true;
 };
 
-const isKingMoveValid = (fromSquare, toSquare) => {
+const isKingMoveValid = (boardState, fromSquare, toSquare, checkCheck) => {
+  // Ensure both squares are defined and valid
+  if (
+    !fromSquare ||
+    !toSquare ||
+    fromSquare.length !== 2 ||
+    toSquare.length !== 2
+  ) {
+    return false;
+  }
+
   const fromFile = fromSquare.charCodeAt(0);
   const fromRank = parseInt(fromSquare[1], 10);
   const toFile = toSquare.charCodeAt(0);
   const toRank = parseInt(toSquare[1], 10);
 
-  // Calculate file and rank differences
+  // Standard king move validation
   const fileDiff = Math.abs(fromFile - toFile);
   const rankDiff = Math.abs(fromRank - toRank);
+  if (fileDiff <= 1 && rankDiff <= 1) {
+    return true;
+  }
 
-  // King can move one square in any direction
-  // fileDiff and rankDiff should be 0 (no move), 1 (one square move), or both 1 (diagonal move)
-  return (
-    (fileDiff === 1 || fileDiff === 0) &&
-    (rankDiff === 1 || rankDiff === 0) &&
-    (fileDiff !== 0 || rankDiff !== 0)
-  );
+  // Castling move validation
+  if (checkCheck && canCastle(boardState, fromSquare, toSquare)) {
+    return true;
+  }
+
+  return false;
+};
+
+const canCastle = (boardState, fromSquare, toSquare) => {
+  const movingPiece = boardState[fromSquare];
+  if (movingPiece.hasMoved) {
+    return false;
+  }
+
+  // Check if it's a valid castling move
+  const rank = fromSquare[1];
+  if (toSquare === `g${rank}` || toSquare === `c${rank}`) {
+    let fileRange = toSquare === `g${rank}` ? ["f", "g"] : ["b", "c", "d"];
+    for (let file of fileRange) {
+      if (boardState[`${file}${rank}`]) {
+        return false; // There are pieces in the way
+      }
+      // Check if the king passes through or lands on a square under attack
+      if (
+        isUnderAttack(
+          boardState,
+          `${file}${rank}`,
+          movingPiece.color === "white" ? "black" : "white"
+        )
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
 };
 
 const isPawnMoveValid = (boardState, fromSquare, toSquare, color) => {
