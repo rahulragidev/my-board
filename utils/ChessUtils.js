@@ -104,7 +104,7 @@ export const isCheckmate = (boardState, kingColor) => {
         if (isMoveValid(boardState, fromSquare, toSquare, false)) {
           const tempBoardState = {
             ...boardState,
-            [toSquare]: piece,
+            [toSquare]: { ...piece, hasMoved: true },
             [fromSquare]: null,
           };
           if (!isKingInCheck(tempBoardState, kingColor)) {
