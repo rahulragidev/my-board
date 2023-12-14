@@ -47,7 +47,8 @@ const createDefaultGameState = () => {
     boardState: createInitialBoard(),
     turn: "white",
     gameStarted: false,
-    time: { white: initialTime, black: initialTime },
+    whiteTime: initialTime,
+    blackTime: initialTime,
     gameHistory: [],
   };
 };
