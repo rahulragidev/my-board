@@ -55,6 +55,40 @@ export const isMoveValid = (
   }
 };
 
+export const createInitialBoard = () => {
+  const ranks = "87654321";
+  const files = "abcdefgh";
+  const board = {};
+
+  ranks.split("").forEach((rank) => {
+    files.split("").forEach((file) => {
+      let piece = null;
+      const color = rank > "6" ? "black" : "white";
+      const square = `${file}${rank}`;
+
+      if (rank === "8" || rank === "1") {
+        const order = [
+          "Rook",
+          "Knight",
+          "Bishop",
+          "Queen",
+          "King",
+          "Bishop",
+          "Knight",
+          "Rook",
+        ];
+        piece = { type: order[files.indexOf(file)], color };
+      } else if (rank === "7" || rank === "2") {
+        piece = { type: "Pawn", color };
+      }
+
+      board[square] = piece;
+    });
+  });
+
+  return board;
+};
+
 export const isCheckmate = (boardState, kingColor) => {
   if (!isKingInCheck(boardState, kingColor)) {
     return false;
