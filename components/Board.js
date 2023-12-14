@@ -280,36 +280,29 @@ const Board = () => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       {checkMate && <GameOver onNewGame={resetGame} />}
-      <div className="flex flex-col lg:flex-row justify-center items-center w-full h-full p-2 gap-4">
+
+      <div className="container mx-auto p-2 flex flex-col lg:flex-row justify-center items-center gap-4">
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={resetGame}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold text-xs py-1 px-2 rounded absolute top-2 right-2"
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded absolute top-2 right-2"
           title="New Game"
+          aria-label="Start new game"
         >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path d="M6 18L18 6M6 6l12 12"></path>{" "}
-            {/* This is a sample icon for a reset symbol */}
-          </svg>
+          X
         </motion.button>
+
         <motion.div
-          className="grid grid-cols-8 mt-4 mb-4 bg-gray-100 p-2 rounded-lg shadow-xl"
+          className="chess-board grid grid-cols-8 bg-gray-100 p-2 rounded-lg shadow-xl"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
           {boardLayout}
         </motion.div>
-        <div className="space-y-2 w-full md:w-1/4">
+
+        <div className="game-info space-y-2 w-full md:w-1/4">
           <CombinedChessClock
             gameStarted={gameStarted}
             whiteTime={whiteTime}
@@ -318,8 +311,9 @@ const Board = () => {
             setWhiteTime={setWhiteTime}
             setBlackTime={setBlackTime}
           />
-          <div className="overflow-y-auto h-32 lg:h-64">
-            <GameHistory history={gameHistory} className="lg:w-1/4 w-full" />
+
+          <div className="game-history overflow-y-auto h-32 lg:h-64">
+            <GameHistory history={gameHistory} />
           </div>
         </div>
       </div>
