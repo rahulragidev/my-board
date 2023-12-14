@@ -21,6 +21,7 @@ import {
 import { motion } from "framer-motion";
 import GameHistory from "./GameHistory";
 import GameOver from "./GameOver";
+import PromotionChoice from "./PromotionChoice";
 
 const loadGameFromLocalStorage = () => {
   try {
@@ -66,6 +67,7 @@ const Board = () => {
   const squareRefs = useRef({});
   const [isInCheck, setIsInCheck] = useState(false);
   const [checkMate, setCheckMate] = useState(false);
+  const [promotion, setPromotion] = useState(null);
 
   const clearCookies = useCallback(() => {
     document.cookie.split(";").forEach((c) => {
@@ -142,6 +144,16 @@ const Board = () => {
           [fromSquare]: null,
         };
 
+        //pawn promotion
+
+        if (
+          movingPiece.type === "Pawn" &&
+          (toSquare[1] === "8" || toSquare[1] === "1")
+        ) {
+          setPromotion({ fromSquare, toSquare, color: movingPiece.color });
+          return;
+        }
+
         // Handle castling move
         if (
           movingPiece.type === "King" &&
@@ -173,6 +185,23 @@ const Board = () => {
       }
     },
     [boardState, playMoveSound, playErrorSound, setGameHistory, setTurn]
+  );
+
+  const handlePromotionChoice = useCallback(
+    (pieceType) => {
+      if (promotion) {
+        const { fromSquare, toSquare, color } = promotion;
+        setBoardState((prevBoardState) => ({
+          ...prevBoardState,
+          [toSquare]: { type: pieceType, color },
+          [fromSquare]: null,
+        }));
+        setTurn((prevTurn) => (prevTurn === "white" ? "black" : "white"));
+        // Update game history and other relevant states
+        setPromotion(null); // Close the promotion choice UI
+      }
+    },
+    [promotion]
   );
 
   const selectPiece = useCallback(
@@ -279,8 +308,6 @@ const Board = () => {
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      {checkMate && <GameOver onNewGame={resetGame} />}
-
       <div className="container mx-auto p-2 flex flex-col lg:flex-row justify-center items-center gap-4">
         <motion.button
           whileHover={{ scale: 1.1 }}
@@ -317,6 +344,13 @@ const Board = () => {
           </div>
         </div>
       </div>
+      {promotion && (
+        <PromotionChoice
+          color={promotion.color}
+          onSelect={handlePromotionChoice}
+        />
+      )}
+      {checkMate && <GameOver onNewGame={resetGame} />}
     </Suspense>
   );
 };
