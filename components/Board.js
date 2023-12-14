@@ -23,23 +23,35 @@ import GameHistory from "./GameHistory";
 import GameOver from "./GameOver";
 
 const loadGameFromLocalStorage = () => {
-  const savedGame = localStorage.getItem("chessGameState");
-  return savedGame ? JSON.parse(savedGame) : null;
+  try {
+    const savedGame = localStorage.getItem("chessGameState");
+    return savedGame ? JSON.parse(savedGame) : null;
+  } catch (error) {
+    console.error("Error loading game from local storage:", error);
+    return null;
+  }
 };
 
 const saveGameToLocalStorage = (gameState) => {
-  localStorage.setItem("chessGameState", JSON.stringify(gameState));
+  try {
+    localStorage.setItem("chessGameState", JSON.stringify(gameState));
+  } catch (error) {
+    console.error("Error saving game to local storage:", error);
+  }
 };
 
 const initialTime = 900;
-const defaultGameState = {
-  boardState: createInitialBoard(),
-  turn: "white",
-  gameStarted: false,
-  whiteTime: initialTime,
-  blackTime: initialTime,
-  gameHistory: [],
+const createDefaultGameState = () => {
+  return {
+    boardState: createInitialBoard(),
+    turn: "white",
+    gameStarted: false,
+    time: { white: initialTime, black: initialTime },
+    gameHistory: [],
+  };
 };
+
+const defaultGameState = createDefaultGameState();
 
 const Board = () => {
   const loadedGameState = loadGameFromLocalStorage() || defaultGameState;
@@ -55,17 +67,19 @@ const Board = () => {
   const [isInCheck, setIsInCheck] = useState(false);
   const [checkMate, setCheckMate] = useState(false);
 
-  useEffect(() => {
-    const clearCookies = () => {
-      document.cookie.split(";").forEach((c) => {
-        document.cookie = c
-          .replace(/^ +/, "")
-          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-      });
-    };
+  const clearCookies = useCallback(() => {
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+  }, []);
 
+  useEffect(() => {
     // Clear cookies on component mount
     clearCookies();
+
+    // Save game state to local storage
     saveGameToLocalStorage({
       boardState,
       turn,
@@ -74,12 +88,24 @@ const Board = () => {
       blackTime,
       gameHistory,
     });
+  }, [
+    boardState,
+    turn,
+    gameStarted,
+    whiteTime,
+    blackTime,
+    gameHistory,
+    clearCookies,
+  ]);
 
+  useEffect(() => {
+    // Update check and checkmate state
     const currentCheckState = isKingInCheck(boardState, turn);
     setIsInCheck(currentCheckState);
+
     const opponentColor = turn === "white" ? "black" : "white";
     setCheckMate(isCheckmate(boardState, opponentColor));
-  }, [boardState, turn, gameStarted, whiteTime, blackTime, gameHistory]);
+  }, [boardState, turn]);
 
   const resetGame = () => {
     setBoardState(createInitialBoard());
@@ -152,9 +178,12 @@ const Board = () => {
   const selectPiece = useCallback(
     (position) => {
       const clickedPiece = boardState[position];
+
+      // Check if a piece is clicked and if it's the turn of that piece's color
       if (clickedPiece && clickedPiece.color === turn) {
         setSelectedPiece(position);
       } else if (selectedPiece) {
+        // If a piece is already selected and a new position is clicked
         movePiece(selectedPiece, position);
         setSelectedPiece(null);
       }
@@ -177,37 +206,35 @@ const Board = () => {
 
   const onDragEnd = useCallback(
     (pieceColor, fromSquare, x, y) => {
-      if (turn !== pieceColor) return;
-      if (!gameStarted) {
-        setGameStarted(true);
-        setWhiteTime(initialTime);
-        setBlackTime(initialTime);
+      if (turn !== pieceColor || !gameStarted) {
+        if (!gameStarted) {
+          setGameStarted(true);
+          setWhiteTime(initialTime);
+          setBlackTime(initialTime);
+        }
+        return;
       }
 
-      const closestSquare = Object.keys(squareRefs.current).reduce(
-        (closest, square) => {
-          const rect = squareRefs.current[square].getBoundingClientRect();
-          const squareCenterX = rect.left + rect.width / 2;
-          const squareCenterY = rect.top + rect.height / 2;
-          const distance = Math.sqrt(
-            Math.pow(x - squareCenterX, 2) + Math.pow(y - squareCenterY, 2)
-          );
-
-          if (!closest || distance < closest.distance) {
-            return { square, distance };
-          }
-
-          return closest;
-        },
-        null
-      );
-
+      const closestSquare = findClosestSquare(x, y);
       if (closestSquare) {
-        movePiece(fromSquare, closestSquare.square);
+        movePiece(fromSquare, closestSquare);
       }
     },
     [turn, gameStarted, movePiece]
   );
+
+  const findClosestSquare = (x, y) => {
+    return Object.keys(squareRefs.current).reduce((closest, square) => {
+      const rect = squareRefs.current[square].getBoundingClientRect();
+      const squareCenterX = rect.left + rect.width / 2;
+      const squareCenterY = rect.top + rect.height / 2;
+      const distance = Math.hypot(x - squareCenterX, y - squareCenterY);
+
+      return !closest || distance < closest.distance
+        ? { square, distance }
+        : closest;
+    }, null)?.square;
+  };
 
   const boardLayout = useMemo(() => {
     const ranks = "87654321";

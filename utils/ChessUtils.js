@@ -59,26 +59,29 @@ export const createInitialBoard = () => {
   const ranks = "87654321";
   const files = "abcdefgh";
   const board = {};
+  const pieceOrder = [
+    "Rook",
+    "Knight",
+    "Bishop",
+    "Queen",
+    "King",
+    "Bishop",
+    "Knight",
+    "Rook",
+  ];
 
   ranks.split("").forEach((rank) => {
-    files.split("").forEach((file) => {
+    files.split("").forEach((file, index) => {
+      const square = file + rank;
       let piece = null;
-      const color = rank > "6" ? "black" : "white";
-      const square = `${file}${rank}`;
 
       if (rank === "8" || rank === "1") {
-        const order = [
-          "Rook",
-          "Knight",
-          "Bishop",
-          "Queen",
-          "King",
-          "Bishop",
-          "Knight",
-          "Rook",
-        ];
-        piece = { type: order[files.indexOf(file)], color };
+        // Place major pieces on the first and last ranks
+        const color = rank === "8" ? "black" : "white";
+        piece = { type: pieceOrder[index], color };
       } else if (rank === "7" || rank === "2") {
+        // Place pawns on the second and second-to-last ranks
+        const color = rank === "7" ? "black" : "white";
         piece = { type: "Pawn", color };
       }
 
