@@ -70,7 +70,11 @@ const Board = () => {
   const [checkMate, setCheckMate] = useState(false);
   const [promotion, setPromotion] = useState(null);
 
-  const clearCookies = useCallback(() => {
+  const clearLocalStorageAndCookies = useCallback(() => {
+    // Clear local storage
+    localStorage.removeItem("chessGameState");
+
+    // Clear cookies
     document.cookie.split(";").forEach((c) => {
       document.cookie = c
         .replace(/^ +/, "")
@@ -80,7 +84,7 @@ const Board = () => {
 
   useEffect(() => {
     // Clear cookies on component mount
-    clearCookies();
+    clearLocalStorageAndCookies();
 
     // Save game state to local storage
     saveGameToLocalStorage({
@@ -98,7 +102,7 @@ const Board = () => {
     whiteTime,
     blackTime,
     gameHistory,
-    clearCookies,
+    clearLocalStorageAndCookies,
   ]);
 
   useEffect(() => {
