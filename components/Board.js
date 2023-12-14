@@ -137,11 +137,11 @@ const Board = () => {
 
   const movePiece = useCallback(
     (fromSquare, toSquare) => {
+      console.log("Entered into Move Piece : ");
       const movingPiece = boardState[fromSquare];
 
       if (isMoveValid(boardState, fromSquare, toSquare)) {
         playMoveSound();
-
         // Prepare the new board state
         const newBoardState = {
           ...boardState,
