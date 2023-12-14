@@ -239,12 +239,18 @@ const Board = () => {
   const boardLayout = useMemo(() => {
     const ranks = "87654321";
     const files = "abcdefgh";
-    const kingPosition = isInCheck ? findKingPosition(boardState, turn) : null;
+    let kingPosition = null;
+
+    if (isInCheck) {
+      kingPosition = findKingPosition(boardState, turn);
+    }
+
     return ranks.split("").flatMap((rank, rankIndex) =>
       files.split("").map((file, fileIndex) => {
         const isDarkSquare = (rankIndex + fileIndex) % 2 === 1;
-        const square = `${file}${rank}`; // This is the position of each square
+        const square = `${file}${rank}`;
         const piece = boardState[square];
+
         return (
           <Square
             key={square}
@@ -269,7 +275,7 @@ const Board = () => {
         );
       })
     );
-  }, [boardState, onDragEnd, onSquareClick, selectPiece]);
+  }, [boardState, isInCheck, turn, onDragEnd, onSquareClick, selectPiece]);
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
