@@ -350,7 +350,7 @@ const Board = () => {
           onSelect={handlePromotionChoice}
         />
       )}
-      {checkMate && <GameOver onNewGame={resetGame} />}
+      {/* {checkMate && <GameOver onNewGame={resetGame} />} */}
     </Suspense>
   );
 };
