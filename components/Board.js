@@ -17,6 +17,7 @@ import {
   isCheckmate,
   findKingPosition,
   createInitialBoard,
+  calculatePossibleMoves,
 } from "../utils/ChessUtils";
 import { motion } from "framer-motion";
 import GameHistory from "./GameHistory";
@@ -69,6 +70,8 @@ const Board = () => {
   const [isInCheck, setIsInCheck] = useState(false);
   const [checkMate, setCheckMate] = useState(false);
   const [promotion, setPromotion] = useState(null);
+  const [possibleMoves, setPossibleMoves] = useState([]);
+  const [recentMove, setRecentMove] = useState(null);
 
   const clearLocalStorageAndCookies = useCallback(() => {
     // Clear local storage
@@ -124,6 +127,9 @@ const Board = () => {
     setSelectedPiece(null);
     setCheckMate(false);
     setIsInCheck(false);
+    setPromotion(null);
+    setPossibleMoves([]);
+    setRecentMove(null);
     // Add other state resets if necessary
   };
 
@@ -141,6 +147,7 @@ const Board = () => {
       const movingPiece = boardState[fromSquare];
 
       if (isMoveValid(boardState, fromSquare, toSquare)) {
+        setRecentMove({ from: fromSquare, to: toSquare });
         playMoveSound();
         // Prepare the new board state
         const newBoardState = {
@@ -188,8 +195,16 @@ const Board = () => {
       } else {
         playErrorSound();
       }
+      setPossibleMoves([]);
     },
-    [boardState, playMoveSound, playErrorSound, setGameHistory, setTurn]
+    [
+      boardState,
+      playMoveSound,
+      playErrorSound,
+      setGameHistory,
+      setTurn,
+      setPossibleMoves,
+    ]
   );
 
   const handlePromotionChoice = useCallback(
@@ -213,13 +228,15 @@ const Board = () => {
     (position) => {
       const clickedPiece = boardState[position];
 
-      // Check if a piece is clicked and if it's the turn of that piece's color
       if (clickedPiece && clickedPiece.color === turn) {
         setSelectedPiece(position);
+        // Calculate possible moves
+        const moves = calculatePossibleMoves(boardState, position);
+        setPossibleMoves(moves);
       } else if (selectedPiece) {
-        // If a piece is already selected and a new position is clicked
         movePiece(selectedPiece, position);
         setSelectedPiece(null);
+        setPossibleMoves([]); // Clear possible moves when a move is made
       }
     },
     [boardState, turn, selectedPiece, movePiece]
@@ -246,15 +263,18 @@ const Board = () => {
           setWhiteTime(initialTime);
           setBlackTime(initialTime);
         }
+        setPossibleMoves([]); // Clear the suggestions
         return;
       }
 
       const closestSquare = findClosestSquare(x, y);
       if (closestSquare) {
         movePiece(fromSquare, closestSquare);
+      } else {
+        setPossibleMoves([]); // Clear the suggestions if no valid square is found
       }
     },
-    [turn, gameStarted, movePiece]
+    [turn, gameStarted, movePiece, calculatePossibleMoves, setPossibleMoves]
   );
 
   const findClosestSquare = (x, y) => {
@@ -284,6 +304,12 @@ const Board = () => {
         const isDarkSquare = (rankIndex + fileIndex) % 2 === 1;
         const square = `${file}${rank}`;
         const piece = boardState[square];
+        const isPossibleMove = possibleMoves.includes(square);
+        const isOpponentPiece = piece && piece.color !== turn;
+        const containsOpponentPiece = isPossibleMove && isOpponentPiece;
+        const isRecentMove =
+          recentMove &&
+          (recentMove.from === square || recentMove.to === square);
 
         return (
           <Square
@@ -293,6 +319,9 @@ const Board = () => {
             ref={(el) => (squareRefs.current[square] = el)}
             onClick={() => onSquareClick(square)}
             isKingInCheckSquare={square === kingPosition}
+            isPossibleMove={isPossibleMove}
+            containsOpponentPiece={containsOpponentPiece} // Pass isPossibleMove as a prop
+            isRecentMove={isRecentMove}
           >
             {piece ? (
               <ChessPiece
@@ -309,7 +338,7 @@ const Board = () => {
         );
       })
     );
-  }, [boardState, isInCheck, turn, onDragEnd, onSquareClick, selectPiece]);
+  }, [boardState, isInCheck, turn, movePiece, possibleMoves, recentMove]);
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
