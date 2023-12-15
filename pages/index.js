@@ -12,12 +12,23 @@ export default function Home() {
     image.src = "/images/logo.png";
     image.onload = () => console.log("Logo preloaded");
 
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-    if (prefersReducedMotion) {
-      setIsLogoAnimated(true);
-      setIsContentVisible(true);
+    if (typeof window !== "undefined") {
+      // Code that should run only in the browser
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+      if (prefersReducedMotion) {
+        setIsLogoAnimated(true);
+        setIsContentVisible(true);
+      }
+
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/service-worker.js").then((reg) => {
+            console.log("Service worker registered.", reg);
+          });
+        });
+      }
     }
   }, []);
 
