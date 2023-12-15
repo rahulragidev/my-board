@@ -173,23 +173,28 @@ const isKingMoveValid = (boardState, fromSquare, toSquare, checkCheck) => {
 
   // Normal king move validation
   if (fileDiff <= 1 && rankDiff <= 1) {
-    return true; // Normal one-square move
+    return true;
   }
 
-  // Castling validation
-  if (fromRank === toRank && (fileDiff === 2 || fileDiff === 3)) {
+  // Castling validation (only when file difference is 2)
+  if (fromRank === toRank && fileDiff === 2) {
     const movingKing = boardState[fromSquare];
     if (!movingKing.hasMoved && !isKingInCheck(boardState, movingKing.color)) {
       const direction = toFile > fromFile ? 1 : -1;
-      const rookSquare = direction === 1 ? "h" + fromRank : "a" + fromRank;
+      const rookFile = direction === 1 ? "h".charCodeAt(0) : "a".charCodeAt(0);
+      const rookSquare = String.fromCharCode(rookFile) + fromRank;
       const rook = boardState[rookSquare];
 
       if (rook && rook.type === "Rook" && !rook.hasMoved) {
-        const pathEnd =
-          direction === 1
-            ? getSquare(toFile - 1, toRank)
-            : getSquare(toFile + 1, toRank);
-        if (isPathClear(boardState, fromSquare, pathEnd)) {
+        if (
+          isPathClear(boardState, fromSquare, rookSquare) &&
+          !isKingPassThroughCheck(
+            boardState,
+            fromSquare,
+            toSquare,
+            movingKing.color
+          )
+        ) {
           return true; // Castling is valid
         }
       }
@@ -197,6 +202,33 @@ const isKingMoveValid = (boardState, fromSquare, toSquare, checkCheck) => {
   }
 
   return false; // Invalid king move
+};
+
+const isKingPassThroughCheck = (
+  boardState,
+  fromSquare,
+  toSquare,
+  kingColor
+) => {
+  const fromFile = fromSquare.charCodeAt(0);
+  const toFile = toSquare.charCodeAt(0);
+  const direction = toFile > fromFile ? 1 : -1;
+
+  let file = fromFile;
+  while (file !== toFile + direction) {
+    const currentSquare = getSquare(file, fromSquare[1]);
+    if (
+      isUnderAttack(
+        boardState,
+        currentSquare,
+        kingColor === "white" ? "black" : "white"
+      )
+    ) {
+      return true;
+    }
+    file += direction;
+  }
+  return false;
 };
 
 const isPawnMoveValid = (boardState, fromSquare, toSquare, color) => {
