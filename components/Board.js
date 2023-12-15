@@ -227,7 +227,7 @@ const Board = () => {
   const selectPiece = useCallback(
     (position) => {
       const clickedPiece = boardState[position];
-
+      setRecentMove(null);
       if (clickedPiece && clickedPiece.color === turn) {
         setSelectedPiece(position);
         // Calculate possible moves
@@ -263,7 +263,8 @@ const Board = () => {
           setWhiteTime(initialTime);
           setBlackTime(initialTime);
         }
-        setPossibleMoves([]); // Clear the suggestions
+        setPossibleMoves([]);
+        setRecentMove(null); // Clear the suggestions
         return;
       }
 
