@@ -1,42 +1,59 @@
 // Chess Logic JavaScript File
 
-// Function to create the initial board setup
-export const createInitialBoard = () => {
-  const ranks = "87654321";
-  const files = "abcdefgh";
-  const board = {};
-  const pieceOrder = [
-    "Rook",
-    "Knight",
-    "Bishop",
-    "Queen",
-    "King",
-    "Bishop",
-    "Knight",
-    "Rook",
-  ];
+// Constants
+const ranks = "87654321";
+const files = "abcdefgh";
+const pieceOrder = [
+  "Rook",
+  "Knight",
+  "Bishop",
+  "Queen",
+  "King",
+  "Bishop",
+  "Knight",
+  "Rook",
+];
 
+// Utility Functions
+const isWithinBoardBounds = (square) =>
+  square.length === 2 &&
+  square[0] >= "a" &&
+  square[0] <= "h" &&
+  square[1] >= "1" &&
+  square[1] <= "8";
+const getSquare = (file, rank) => String.fromCharCode(file) + rank;
+const isStraightMove = (fromFile, fromRank, toFile, toRank) =>
+  fromFile === toFile || fromRank === toRank;
+const isDiagonalMove = (fromFile, fromRank, toFile, toRank) =>
+  Math.abs(fromFile - toFile) === Math.abs(fromRank - toRank);
+
+// Board Initialization
+export const createInitialBoard = () => {
+  const board = {};
   ranks.split("").forEach((rank) => {
     files.split("").forEach((file, index) => {
       const square = file + rank;
       let piece = null;
-
       if (rank === "8" || rank === "1") {
-        const color = rank === "8" ? "black" : "white";
-        piece = { type: pieceOrder[index], color, hasMoved: false };
+        piece = {
+          type: pieceOrder[index],
+          color: rank === "8" ? "black" : "white",
+          hasMoved: false,
+        };
       } else if (rank === "7" || rank === "2") {
-        const color = rank === "7" ? "black" : "white";
-        piece = { type: "Pawn", color, hasMoved: false };
+        piece = {
+          type: "Pawn",
+          color: rank === "7" ? "black" : "white",
+          hasMoved: false,
+        };
       }
-
       board[square] = piece;
     });
   });
-
   return board;
 };
 
-// Function to check if a move is valid
+// Move Validation
 export const isMoveValid = (
   boardState,
   fromSquare,
@@ -44,158 +61,67 @@ export const isMoveValid = (
   checkCheck = true
 ) => {
   const movingPiece = boardState[fromSquare];
-  const targetPiece = boardState[toSquare];
-
-  if (!movingPiece || fromSquare === toSquare) {
+  if (
+    !movingPiece ||
+    fromSquare === toSquare ||
+    !isWithinBoardBounds(toSquare)
+  ) {
     return false;
   }
 
+  const targetPiece = boardState[toSquare];
   if (targetPiece && movingPiece.color === targetPiece.color) {
     return false;
   }
 
-  if (!isWithinBoardBounds(toSquare)) {
-    return false;
-  }
-
-  const tempBoardState = {
-    ...boardState,
-    [toSquare]: movingPiece,
-    [fromSquare]: null,
-  };
-
-  if (checkCheck && isKingInCheck(tempBoardState, movingPiece.color)) {
-    return false;
-  }
-
+  let isValid = false;
   switch (movingPiece.type) {
-    case "Rook":
-      return isRookMoveValid(boardState, fromSquare, toSquare);
-    case "Knight":
-      return isKnightMoveValid(fromSquare, toSquare);
-    case "Bishop":
-      return isBishopMoveValid(boardState, fromSquare, toSquare);
-    case "Queen":
-      return isQueenMoveValid(boardState, fromSquare, toSquare);
-    case "King":
-      return isKingMoveValid(boardState, fromSquare, toSquare, checkCheck);
     case "Pawn":
-      return isPawnMoveValid(
+      isValid = isPawnMoveValid(
         boardState,
         fromSquare,
         toSquare,
         movingPiece.color
       );
-    default:
-      return false;
+      break;
+    case "Rook":
+      isValid = isRookMoveValid(boardState, fromSquare, toSquare);
+      break;
+    case "Knight":
+      isValid = isKnightMoveValid(fromSquare, toSquare);
+      break;
+    case "Bishop":
+      isValid = isBishopMoveValid(boardState, fromSquare, toSquare);
+      break;
+    case "Queen":
+      isValid = isQueenMoveValid(boardState, fromSquare, toSquare);
+      break;
+    case "King":
+      isValid = isKingMoveValid(boardState, fromSquare, toSquare, checkCheck);
+      break;
   }
+
+  if (isValid && checkCheck) {
+    const tempBoardState = {
+      ...boardState,
+      [toSquare]: movingPiece,
+      [fromSquare]: null,
+    };
+    return !isKingInCheck(tempBoardState, movingPiece.color);
+  }
+
+  return isValid;
 };
 
-// Function to check for checkmate
-export const isCheckmate = (boardState, kingColor) => {
-  if (!isKingInCheck(boardState, kingColor)) {
-    return false;
-  }
+// Piece-specific Move Validations
+const isRookMoveValid = (boardState, fromSquare, toSquare) =>
+  isStraightMove(
+    fromSquare.charCodeAt(0),
+    parseInt(fromSquare[1], 10),
+    toSquare.charCodeAt(0),
+    parseInt(toSquare[1], 10)
+  ) && isPathClear(boardState, fromSquare, toSquare);
 
-  for (let fromSquare in boardState) {
-    const piece = boardState[fromSquare];
-    if (piece && piece.color === kingColor) {
-      for (let toSquare in boardState) {
-        if (isMoveValid(boardState, fromSquare, toSquare, false)) {
-          const tempBoardState = {
-            ...boardState,
-            [toSquare]: { ...piece, hasMoved: true },
-            [fromSquare]: null,
-          };
-          if (!isKingInCheck(tempBoardState, kingColor)) {
-            return false;
-          }
-        }
-      }
-    }
-  }
-
-  return true;
-};
-
-// Function to find the king's position
-export const findKingPosition = (boardState, kingColor) => {
-  for (let square in boardState) {
-    const piece = boardState[square];
-    if (piece && piece.type === "King" && piece.color === kingColor) {
-      return square;
-    }
-  }
-  return null;
-};
-
-// Function to check if the king is in check
-export const isKingInCheck = (boardState, kingColor) => {
-  const kingPosition = findKingPosition(boardState, kingColor);
-  const enemyColor = kingColor === "white" ? "black" : "white";
-  return isUnderAttack(boardState, kingPosition, enemyColor);
-};
-
-// Function to check if a square is under attack
-const isUnderAttack = (boardState, position, enemyColor) => {
-  for (let square in boardState) {
-    const piece = boardState[square];
-    if (piece && piece.color === enemyColor) {
-      if (isMoveValid(boardState, square, position, false)) {
-        return true;
-      }
-    }
-  }
-  return false;
-};
-
-// Function to check if a square is within board bounds
-const isWithinBoardBounds = (square) => {
-  if (!square || square.length !== 2) {
-    return false;
-  }
-
-  const file = square.charCodeAt(0);
-  const rank = parseInt(square[1], 10);
-
-  return (
-    file >= "a".charCodeAt(0) &&
-    file <= "h".charCodeAt(0) &&
-    rank >= 1 &&
-    rank <= 8
-  );
-};
-
-// Function to validate a rook's move
-const isRookMoveValid = (boardState, fromSquare, toSquare) => {
-  const fromFile = fromSquare.charCodeAt(0);
-  const fromRank = parseInt(fromSquare[1], 10);
-  const toFile = toSquare.charCodeAt(0);
-  const toRank = parseInt(toSquare[1], 10);
-
-  if (fromFile !== toFile && fromRank !== toRank) {
-    return false;
-  }
-
-  const fileStep = fromFile === toFile ? 0 : toFile > fromFile ? 1 : -1;
-  const rankStep = fromRank === toRank ? 0 : toRank > fromRank ? 1 : -1;
-
-  let currentFile = fromFile + fileStep;
-  let currentRank = fromRank + rankStep;
-
-  while (currentFile !== toFile || currentRank !== toRank) {
-    const currentSquare = String.fromCharCode(currentFile) + currentRank;
-    if (boardState[currentSquare]) {
-      return false;
-    }
-    currentFile += fileStep;
-    currentRank += rankStep;
-  }
-
-  return true;
-};
-
-// Function to validate a knight's move
 const isKnightMoveValid = (fromSquare, toSquare) => {
   const fromFile = fromSquare.charCodeAt(0);
   const fromRank = parseInt(fromSquare[1], 10);
@@ -210,55 +136,32 @@ const isKnightMoveValid = (fromSquare, toSquare) => {
   );
 };
 
-// Function to validate a bishop's move
-const isBishopMoveValid = (boardState, fromSquare, toSquare) => {
-  const fromFile = fromSquare.charCodeAt(0);
-  const fromRank = parseInt(fromSquare[1], 10);
-  const toFile = toSquare.charCodeAt(0);
-  const toRank = parseInt(toSquare[1], 10);
+const isBishopMoveValid = (boardState, fromSquare, toSquare) =>
+  isDiagonalMove(
+    fromSquare.charCodeAt(0),
+    parseInt(fromSquare[1], 10),
+    toSquare.charCodeAt(0),
+    parseInt(toSquare[1], 10)
+  ) && isPathClear(boardState, fromSquare, toSquare);
 
-  const fileDiff = Math.abs(fromFile - toFile);
-  const rankDiff = Math.abs(fromRank - toRank);
-
-  if (fileDiff !== rankDiff) {
-    return false;
-  }
-
-  const fileStep = Math.sign(toFile - fromFile);
-  const rankStep = Math.sign(toRank - fromRank);
-
-  let currentFile = fromFile + fileStep;
-  let currentRank = fromRank + rankStep;
-
-  while (currentFile !== toFile || currentRank !== toRank) {
-    const currentSquare = String.fromCharCode(currentFile) + currentRank;
-    if (boardState[currentSquare]) {
-      return false;
-    }
-    currentFile += fileStep;
-    currentRank += rankStep;
-  }
-
-  return true;
+const isQueenMoveValid = (boardState, fromSquare, toSquare) => {
+  return (
+    (isStraightMove(
+      fromSquare.charCodeAt(0),
+      parseInt(fromSquare[1], 10),
+      toSquare.charCodeAt(0),
+      parseInt(toSquare[1], 10)
+    ) ||
+      isDiagonalMove(
+        fromSquare.charCodeAt(0),
+        parseInt(fromSquare[1], 10),
+        toSquare.charCodeAt(0),
+        parseInt(toSquare[1], 10)
+      )) &&
+    isPathClear(boardState, fromSquare, toSquare)
+  );
 };
 
-// Function to validate a queen's move
-export const isQueenMoveValid = (boardState, fromSquare, toSquare) => {
-  const fromFile = fromSquare.charCodeAt(0);
-  const fromRank = parseInt(fromSquare[1], 10);
-  const toFile = toSquare.charCodeAt(0);
-  const toRank = parseInt(toSquare[1], 10);
-
-  if (
-    isStraightMove(fromFile, fromRank, toFile, toRank) ||
-    isDiagonalMove(fromFile, fromRank, toFile, toRank)
-  ) {
-    return isPathClear(boardState, fromFile, fromRank, toFile, toRank);
-  }
-  return false;
-};
-
-// Function to validate a king's move including castling
 const isKingMoveValid = (boardState, fromSquare, toSquare, checkCheck) => {
   const fromFile = fromSquare.charCodeAt(0);
   const fromRank = parseInt(fromSquare[1], 10);
@@ -268,102 +171,199 @@ const isKingMoveValid = (boardState, fromSquare, toSquare, checkCheck) => {
   const fileDiff = Math.abs(fromFile - toFile);
   const rankDiff = Math.abs(fromRank - toRank);
 
+  // Normal king move validation
   if (fileDiff <= 1 && rankDiff <= 1) {
     return true;
   }
 
-  if (checkCheck && canCastle(boardState, fromSquare, toSquare)) {
-    return true;
-  }
+  // Castling validation (only when file difference is 2)
+  if (fromRank === toRank && fileDiff === 2) {
+    const movingKing = boardState[fromSquare];
+    if (!movingKing.hasMoved && !isKingInCheck(boardState, movingKing.color)) {
+      const direction = toFile > fromFile ? 1 : -1;
+      const rookFile = direction === 1 ? "h".charCodeAt(0) : "a".charCodeAt(0);
+      const rookSquare = String.fromCharCode(rookFile) + fromRank;
+      const rook = boardState[rookSquare];
 
-  return false;
-};
-
-// Function to check if castling is possible
-const canCastle = (boardState, fromSquare, toSquare) => {
-  const movingPiece = boardState[fromSquare];
-  if (movingPiece.hasMoved) {
-    return false;
-  }
-
-  const rank = fromSquare[1];
-  if (toSquare === `g${rank}` || toSquare === `c${rank}`) {
-    let fileRange = toSquare === `g${rank}` ? ["f", "g"] : ["b", "c", "d"];
-    for (let file of fileRange) {
-      if (boardState[`${file}${rank}`]) {
-        return false;
-      }
-      if (
-        isUnderAttack(
-          boardState,
-          `${file}${rank}`,
-          movingPiece.color === "white" ? "black" : "white"
-        )
-      ) {
-        return false;
+      if (rook && rook.type === "Rook" && !rook.hasMoved) {
+        if (
+          isPathClear(boardState, fromSquare, rookSquare) &&
+          !isKingPassThroughCheck(
+            boardState,
+            fromSquare,
+            toSquare,
+            movingKing.color
+          )
+        ) {
+          return true; // Castling is valid
+        }
       }
     }
-    return true;
+  }
+
+  return false; // Invalid king move
+};
+
+const isKingPassThroughCheck = (
+  boardState,
+  fromSquare,
+  toSquare,
+  kingColor
+) => {
+  const fromFile = fromSquare.charCodeAt(0);
+  const toFile = toSquare.charCodeAt(0);
+  const direction = toFile > fromFile ? 1 : -1;
+
+  let file = fromFile;
+  while (file !== toFile + direction) {
+    const currentSquare = getSquare(file, fromSquare[1]);
+    if (
+      isUnderAttack(
+        boardState,
+        currentSquare,
+        kingColor === "white" ? "black" : "white"
+      )
+    ) {
+      return true;
+    }
+    file += direction;
   }
   return false;
 };
 
-// Function to validate a pawn's move
 const isPawnMoveValid = (boardState, fromSquare, toSquare, color) => {
   const fromFile = fromSquare.charCodeAt(0);
   const fromRank = parseInt(fromSquare[1], 10);
   const toFile = toSquare.charCodeAt(0);
   const toRank = parseInt(toSquare[1], 10);
-  const targetPiece = boardState[toSquare];
   const direction = color === "white" ? 1 : -1;
   const startRank = color === "white" ? 2 : 7;
 
-  if (fromFile === toFile && toRank === fromRank + direction) {
-    return !targetPiece;
+  // Normal move
+  if (
+    fromFile === toFile &&
+    !boardState[toSquare] &&
+    toRank === fromRank + direction
+  ) {
+    return true;
   }
 
+  // First move: two squares
   if (
     fromFile === toFile &&
     fromRank === startRank &&
-    toRank === fromRank + 2 * direction
+    toRank === fromRank + 2 * direction &&
+    !boardState[toSquare] &&
+    !boardState[getSquare(fromFile, fromRank + direction)]
   ) {
-    const intermediateSquare =
-      String.fromCharCode(fromFile) + (fromRank + direction);
-    return !targetPiece && !boardState[intermediateSquare];
+    return true;
   }
 
-  if (Math.abs(fromFile - toFile) === 1 && toRank === fromRank + direction) {
-    return targetPiece && targetPiece.color !== color;
+  // Capture
+  if (
+    Math.abs(fromFile - toFile) === 1 &&
+    toRank === fromRank + direction &&
+    boardState[toSquare] &&
+    boardState[toSquare].color !== color
+  ) {
+    return true;
   }
 
   return false;
 };
 
-// Helper functions to check the type of move
-const isDiagonalMove = (fromFile, fromRank, toFile, toRank) => {
-  return Math.abs(fromFile - toFile) === Math.abs(fromRank - toRank);
+export const isCheckmate = (boardState, kingColor) => {
+  if (!isKingInCheck(boardState, kingColor)) {
+    return false; // Not checkmate if the king is not in check
+  }
+
+  for (let fromSquare in boardState) {
+    const piece = boardState[fromSquare];
+    if (piece && piece.color === kingColor) {
+      for (let toSquare in boardState) {
+        if (isMoveValid(boardState, fromSquare, toSquare, true)) {
+          const tempBoardState = {
+            ...boardState,
+            [toSquare]: piece,
+            [fromSquare]: null,
+          };
+          if (!isKingInCheck(tempBoardState, kingColor)) {
+            return false; // Not checkmate if there's a valid move that removes the check
+          }
+        }
+      }
+    }
+  }
+
+  return true; // Checkmate if no valid moves remove the check
 };
 
-const isStraightMove = (fromFile, fromRank, toFile, toRank) => {
-  return fromFile === toFile || fromRank === toRank;
+export const findKingPosition = (boardState, kingColor) => {
+  for (let square in boardState) {
+    const piece = boardState[square];
+    if (piece && piece.type === "King" && piece.color === kingColor) {
+      return square;
+    }
+  }
+  return null; // King not found (shouldn't happen in a valid game state)
 };
 
-// Helper function to check if the path between two squares is clear
-const isPathClear = (boardState, fromFile, fromRank, toFile, toRank) => {
-  const fileStep = Math.sign(toFile - fromFile);
-  const rankStep = Math.sign(toRank - fromRank);
-  let currentFile = fromFile + fileStep;
-  let currentRank = fromRank + rankStep;
+export const isKingInCheck = (boardState, kingColor) => {
+  const kingPosition = findKingPosition(boardState, kingColor);
+  return isUnderAttack(
+    boardState,
+    kingPosition,
+    kingColor === "white" ? "black" : "white"
+  );
+};
+
+const isUnderAttack = (boardState, position, enemyColor) => {
+  for (let square in boardState) {
+    const piece = boardState[square];
+    if (
+      piece &&
+      piece.color === enemyColor &&
+      isMoveValid(boardState, square, position, false)
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const isPathClear = (boardState, fromSquare, toSquare) => {
+  const fromFile = fromSquare.charCodeAt(0),
+    fromRank = parseInt(fromSquare[1], 10),
+    toFile = toSquare.charCodeAt(0),
+    toRank = parseInt(toSquare[1], 10);
+  const fileStep = Math.sign(toFile - fromFile),
+    rankStep = Math.sign(toRank - fromRank);
+  let currentFile = fromFile + fileStep,
+    currentRank = fromRank + rankStep;
 
   while (currentFile !== toFile || currentRank !== toRank) {
-    const currentSquare = String.fromCharCode(currentFile) + currentRank;
-    if (boardState[currentSquare]) {
-      return false;
-    }
+    const currentSquare = getSquare(currentFile, currentRank);
+    if (boardState[currentSquare]) return false;
     currentFile += fileStep;
     currentRank += rankStep;
   }
   return true;
 };
 
-// End of file
+export const calculatePossibleMoves = (boardState, fromSquare) => {
+  let moves = [];
+  const movingPiece = boardState[fromSquare];
+  if (!movingPiece) return moves;
+
+  for (let rank = 1; rank <= 8; rank++) {
+    for (let file = 0; file < 8; file++) {
+      let toSquare = `${String.fromCharCode("a".charCodeAt(0) + file)}${rank}`;
+      if (isMoveValid(boardState, fromSquare, toSquare)) {
+        moves.push(toSquare);
+      }
+    }
+  }
+  return moves;
+};
+
+// End of File
