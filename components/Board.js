@@ -344,17 +344,6 @@ const Board = () => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <div className="container mx-auto p-2 flex flex-col lg:flex-row justify-center items-center gap-4">
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={resetGame}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded absolute top-2 right-2"
-          title="New Game"
-          aria-label="Start new game"
-        >
-          X
-        </motion.button>
-
         <motion.div
           className="chess-board grid grid-cols-8 bg-gray-100 p-2 rounded-lg shadow-xl"
           initial={{ opacity: 0 }}
@@ -373,7 +362,48 @@ const Board = () => {
             setWhiteTime={setWhiteTime}
             setBlackTime={setBlackTime}
           />
-
+          <div className="flex justify-between p-4 m-2">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={resetGame}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded"
+              title="New Game"
+              aria-label="Start new game"
+            >
+              Reset
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={resetGame}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-2 rounded"
+              title="New Game"
+              aria-label="Start new game"
+            >
+              Takeback
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={resetGame}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-2 rounded"
+              title="Resign"
+              aria-label="Resign from the game"
+            >
+              Resign
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={resetGame}
+              className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-2 rounded"
+              title="Offer Draw"
+              aria-label="Offer a draw to the opponent"
+            >
+              Draw
+            </motion.button>
+          </div>
           <div className="game-history overflow-y-auto h-32 lg:h-64">
             <GameHistory history={gameHistory} />
           </div>
