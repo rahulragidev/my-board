@@ -84,7 +84,7 @@ export default function Home() {
           <motion.div
             variants={contentVariants}
             transition={{ delay: 0.5, duration: 0.7 }}
-            className="w-full px-4 py-2"
+            className="w-full"
           >
             <Board />
           </motion.div>
