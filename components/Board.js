@@ -23,7 +23,13 @@ import { motion } from "framer-motion";
 import GameHistory from "./GameHistory";
 import GameOver from "./GameOver";
 import PromotionChoice from "./PromotionChoice";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUndo,
+  faReply,
+  faTimes,
+  faHandshake,
+} from "@fortawesome/free-solid-svg-icons";
 const loadGameFromLocalStorage = () => {
   try {
     const savedGame = localStorage.getItem("chessGameState");
@@ -362,46 +368,46 @@ const Board = () => {
             setWhiteTime={setWhiteTime}
             setBlackTime={setBlackTime}
           />
-          <div className="flex justify-between p-4 m-2">
+          <div className="flex space-x-2 p-1 justify-center">
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={resetGame}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded-full"
               title="New Game"
               aria-label="Start new game"
             >
-              Reset
+              <FontAwesomeIcon icon={faUndo} />
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={resetGame}
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-2 rounded"
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-2 rounded-full"
               title="New Game"
               aria-label="Start new game"
             >
-              Takeback
+              <FontAwesomeIcon icon={faReply} />
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={resetGame}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-2 rounded"
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-2 rounded-full"
               title="Resign"
               aria-label="Resign from the game"
             >
-              Resign
+              <FontAwesomeIcon icon={faTimes} />
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={resetGame}
-              className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-2 rounded"
+              className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-2 rounded-full"
               title="Offer Draw"
               aria-label="Offer a draw to the opponent"
             >
-              Draw
+              <FontAwesomeIcon icon={faHandshake} />
             </motion.button>
           </div>
           <div className="game-history overflow-y-auto h-32 lg:h-64">
