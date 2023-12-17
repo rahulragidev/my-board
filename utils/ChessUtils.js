@@ -269,6 +269,30 @@ const isPawnMoveValid = (boardState, fromSquare, toSquare, color) => {
     return true;
   }
 
+  // En passant capture logic
+  const enemyRank =
+    color === "white"
+      ? parseInt(toSquare[1], 10) - 1
+      : parseInt(toSquare[1], 10) + 1;
+  const enemySquare = `${toSquare[0]}${enemyRank}`;
+  const enemyPiece = boardState[enemySquare];
+
+  // Check if the moving pawn is on its fifth rank
+  const isPawnOnFifthRank =
+    (color === "white" && fromRank === 5) ||
+    (color === "black" && fromRank === 4);
+
+  if (
+    isPawnOnFifthRank &&
+    enemyPiece &&
+    enemyPiece.type === "Pawn" &&
+    enemyPiece.justDoubleMoved &&
+    Math.abs(fromSquare.charCodeAt(0) - toSquare.charCodeAt(0)) === 1 &&
+    toSquare[1] === (color === "white" ? "6" : "3")
+  ) {
+    return true;
+  }
+
   return false;
 };
 

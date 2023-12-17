@@ -152,15 +152,28 @@ const Board = () => {
       console.log("Entered into Move Piece : ");
       const movingPiece = boardState[fromSquare];
 
+      // Check if the move is valid
       if (isMoveValid(boardState, fromSquare, toSquare)) {
         setRecentMove({ from: fromSquare, to: toSquare });
         playMoveSound();
+
         // Prepare the new board state
-        const newBoardState = {
-          ...boardState,
-          [toSquare]: { ...movingPiece, hasMoved: true }, // Mark the piece as having moved
-          [fromSquare]: null,
-        };
+        const newBoardState = { ...boardState };
+
+        // Handle normal move or capture
+        newBoardState[toSquare] = { ...movingPiece, hasMoved: true };
+        newBoardState[fromSquare] = null;
+
+        // Handle pawn's double move
+        if (
+          movingPiece.type === "Pawn" &&
+          Math.abs(fromSquare[1] - toSquare[1]) === 2
+        ) {
+          newBoardState[toSquare] = {
+            ...newBoardState[toSquare],
+            justDoubleMoved: true,
+          };
+        }
 
         //pawn promotion
 
@@ -170,6 +183,20 @@ const Board = () => {
         ) {
           setPromotion({ fromSquare, toSquare, color: movingPiece.color });
           return;
+        }
+
+        // Handle en passant capture
+        if (
+          movingPiece.type === "Pawn" &&
+          Math.abs(fromSquare.charCodeAt(0) - toSquare.charCodeAt(0)) === 1 &&
+          !boardState[toSquare]
+        ) {
+          const capturedPawnRank =
+            movingPiece.color === "white"
+              ? parseInt(toSquare[1], 10) - 1
+              : parseInt(toSquare[1], 10) + 1;
+          const capturedPawnSquare = `${toSquare[0]}${capturedPawnRank}`;
+          newBoardState[capturedPawnSquare] = null;
         }
 
         // Handle castling move
@@ -193,11 +220,24 @@ const Board = () => {
         // Update board state, turn, and game history
         setBoardState(newBoardState);
         setTurn((prevTurn) => (prevTurn === "white" ? "black" : "white"));
+
+        // Update game history
         const movedPiece = boardState[fromSquare]?.type;
         setGameHistory((prevHistory) => [
           ...prevHistory,
           { from: fromSquare, to: toSquare, piece: movedPiece },
         ]);
+
+        // Reset justDoubleMoved for all pawns except the one that just moved
+        Object.keys(newBoardState).forEach((key) => {
+          if (
+            newBoardState[key] &&
+            newBoardState[key].type === "Pawn" &&
+            key !== toSquare
+          ) {
+            newBoardState[key].justDoubleMoved = false;
+          }
+        });
       } else {
         playErrorSound();
       }
